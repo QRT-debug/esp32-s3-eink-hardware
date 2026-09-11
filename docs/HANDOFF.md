@@ -1,0 +1,104 @@
+# Handoff
+
+## Current Status
+
+**阶段 1 进展：ESP32-S3 主控段 + TPS63021 电源段已完成并核对通过（2026-09-11 22:07 版本）。**
+- U1 段：U1（C2913202）+ R1 + C1/C2/C3（模组去耦与 EN RC），早已核对通过。
+- U2 段（2026-09-11 22:18 版本，`easyeda sch read` 读活体网表核对）：TPS63021DSJR + L3 + C1–C9、R1，**15 个引脚连接全部正确**。
+  - 器件：U2 = TPS63021DSJR（C202140，VSON-14 带 EP）；L3 = 顺络 WPN4020H1R5MT（C98360，1.5 µH，**Isat 7.7 A** / Irms 5.2 A / DCR 36 mΩ / 屏蔽 / 4×4×2 mm）；C4/C5 = 10 µF **35 V** 0805 X5R（C33546007）；C6 = 0.1 µF 0402（C1525）；C7/C8/C9 = 22 µF 25 V 0805 X5R（C6119899）；C1 = 22 µF 25 V 0805；C2 = 0.1 µF 0402；C3 = 1 µF 50 V 0805；R1 = 10 kΩ 0805。
+  - 网表：`VBAT = U2.1(VINA)+10+11(VIN)+12(EN)+C4.2+C5.2+C6.2`；`3V3 = U2.3(FB)+4+5(VOUT)+C7.2+C8.2+C9.2+U1.2+C1.2+C2.2+R1.2`；`GND = U2.2+U2.13(PS/SYNC)+U2.15(PowerPAD)+C3/C2/C1/C6/C7/C8/C9/C5/C4.1+U1.1/40/41`；`EN = U1.3+R1.1+C3.2`；电感正确跨接 `U2.6/7 —L3— U2.8/9`。**FB 直接接 3V3、PS/SYNC 接 GND、PowerPAD 接 GND、PG 悬空，全部符合设计。**
+  - **4 个非连接标识（NC 叉号）已确认存在**（导出的矢量 SVG 中查到 4 个 8×8 的 X 形 path，位置对应 U1.28/29/30 三个相邻脚 + U2.14）。
+- **ESP32 段与官方推荐已对齐**：官方 WROOM-1 数据手册 Figure 7 典型应用图为 **22 µF + 0.1 µF**（EN 处另有 0.1 µF；EN 的 RC 按注释为 10 kΩ + 1 µF）。本板 C1 = 22 µF ↔ 官方 C1、C2 = 0.1 µF ↔ 官方 C3、C3 + R1 ↔ 官方 EN RC，**已一致，无需改动**。
+- **唯一遗留**：**2 条零长度导线**待删——这是 `easyeda sch check` 目前 `passed=false` 的唯一原因（其余计数项全 0）。
+
+读取方法：`easyeda daemon start --auto-update-skill=false`（**必须后台运行**，前台会被终止）→ `easyeda sch list` / `easyeda sch read`。**注意**：本地 `.eprj2` 的 `documents` 表始终为 0 行，不能用它判断画布是否为空。
+协作链路：半离线模式本地工程 `C:\Users\Admin\Documents\LCEDA-Pro\projects\esp32-s3-eink-hardware.eprj2`。仓库 `.epro2` 已无用。
+自动化链路 `easyeda-agent v1.4.8`：**协作方式为用户手动绘制，agent 只做读取/核对/建议，不自动落图**。
+用户已确认进入原理图绘制阶段。新增 `docs/SCHEMATIC_CHECKLIST.md` 作为分阶段绘制清单；当前从阶段 1「主控 + 电源 + 双 Type-C」开始。
+自动化链路已切换为 `easyeda-agent v1.4.8`：CLI、Codex Skill 与 daemon 已安装并对齐，daemon 正常监听 `127.0.0.1:60832`；用户已安装 EDA Agent Connector 并卸载 Run API Gateway。**当前协作方式已改为：用户手动绘制，Codex 只做方案讲解、网表核对与建议，不再自动落图。**
+
+## Update Rule
+
+实质性工作后刷新本文件。满足以下任一条件即视为实质性工作：
+
+1. 编辑了代码或工程文件
+2. 确认或排除了一个疑似问题
+3. 追踪多个文件完成了一条运行链路
+4. 下一步建议发生变化
+
+## Confirmed Findings
+
+- **P1 阶段 1 首次核对通过（2026-09-11 00:44 保存版本，经 easyeda-agent 读活体网表逐项核对）**。已放置：U1（C2913202，封装 `WIRELM-SMD_ESP32-S3-WROOM-1`）、C1 = 10 µF/25 V 0805（HGC0805R5106K250NSLJ）、C2 = 0.1 µF/50 V 0805（FCC0805B104K500DT）、C3 = 1 µF/50 V X7R 0805（CL21B105KBFNNNE）、R1 = 10 kΩ 0805（FRC0805J103TS）+ 电源/地符号，共 12 个图元。
+- **网表核对全部正确**：`3V3 = U1.2 + C1.2 + C2.2 + R1.2`；`EN = U1.3 + R1.1 + C3.2`（= 官方推荐 10 kΩ 上拉 + 1 µF 对地）；`GND = U1.1 + U1.40 + U1.41(EPAD) + C1.1 + C2.1 + C3.1`；其余 36 根 GPIO/串口网络逐一对应模组真实引脚功能，与 `docs/PIN_MAP.md` 完全一致，**0 悬空引脚**。
+- **阶段 1 待补 3 项**：① EN → 轻触开关 → GND（复位按键，现缺失）；② GPIO0 需 10 kΩ 上拉到 3V3 + BOOT 按键到 GND（现仅挂网络标签）；③ **GPIO35/36/37（U1.28/29/30）在 N16R8 上被八线 PSRAM 内部占用、必须悬空**，建议打非连接(NC)标记防误接。
+- 小问题：3 条**零长度导线**（坐标约 560,1450 / 600,1450 / 635,1420）应删除；C2 的 0.1 µF 用 0805 可用但 0402/0603 高频性能更好；C1 10 µF 已达指南底线，官方典型应用为 22 µF，可后续并联一颗。
+- **本地 `.eprj2` 的 `documents` 表在该客户端版本下始终为 0 行，不代表画布为空**；`project_images` 缩略图会在删除图页后残留旧内容。判画布状态以 `easyeda sch read` 的 componentCount 为准。
+- **U1 封装选型已落实（2026-09-11 实测验证）**：立创器件 **C2913202**（`ESP32-S3-WROOM-1-N16R8`，商品页 `item.szlcsc.com/3198300.html`），封装名 `WIRELM-SMD_ESP32-S3-WROOM-1`。抓取其封装数据实测：40 个边缘焊盘 1.5 × 0.9 mm / 间距 1.27 mm（左 14 + 底 12 + 右 14），**第 41 脚 EPAD = 3×3 九个 0.9 mm 焊盘、间距 1.4 mm、整体 3.7 × 3.7 mm**。与官方 KiCad 库 `espressif/kicad-libraries` 的 `ESP32-S3-WROOM-1.kicad_mod` 尺寸**完全一致**，可直接用。**关键：立创封装不含热过孔**，PCB 阶段须自行补 ≥9（推荐 16）个 0.5 mm 地过孔。官方权威来源是 KiCad 库与模组产品页；**数据手册内嵌的 `sites/default/files/modules-dxf/...` 老链接已 403 失效**。
+- **模组 EPAD 热焊盘已查清（2026-09-11，官方数据手册核实）**：ESP32-S3 有两个封装层级的 EPAD，含义完全不同——①**裸芯片 QFN-56-EP（7×7mm，立创 C2913192）**：EPAD 是**第 57 脚，它就是芯片唯一的地**，必须接 GND 平面（官方要求 ≥9 个地过孔），不接芯片不工作且射频劣化；②**模组 ESP32-S3-WROOM-1**：底部中央热焊盘在官方符号中编为**第 41 脚 EPAD**（1=GND、40=GND、41=EPAD），官方明确「焊到地板的地不是必须」，焊了散热更好。**实务陷阱**：元件库常把这个焊盘当机械焊盘处理、不建脚位，符号看着「没有 EPAD」但板上焊盘必须存在。已写入 `docs/DESIGN.md` PCB 注意事项 13/14/15 条。
+- **`.eprj2` 只读解析（2026-09-11 修正）**：先 `shutil.copy2` 到临时目录再以 `mode=ro` 打开。关键表：`projects`（name/updated_at）、`project_structures`（版本快照，取 `ticket` 最大者）、`history_data`（加密，不可解）、`project_images`（图页缩略图，**删除图页后会残留旧图，只能当历史参考**）。**⚠️ 该客户端版本的 `documents` 表始终为 0 行，不能用它判断画布是否为空**——判画布要用 `easyeda sch read`（componentCount/netCount），离线兜底才看缩略图。
+- 手动绘图模式定稿（2026-09-10 用户确认）：此前自动落图内容已全部删除，后续由用户在 EasyEDA Pro 中手动画图；Codex 负责“怎么画、画哪儿、接哪儿”的指导和只读检查，避免继续依赖画布识别。
+- 充电指示设计定稿（2026-09-10）：双层方案——① TP4056 CHRG/STDBY 开漏脚驱动红/绿双色 LED（0 GPIO，深睡可见）；② CHRG 经 10kΩ 上拉接 **GPIO17**，软件读充电态上墨水屏，且 GPIO17 属 RTC 域支持深睡唤醒（插充电器即唤醒刷新屏）。充满态由「CHRG=高 + SoC≥98%」推断，省一颗脚。GPIO17 占用后干净空闲仅剩 GPIO18。
+- 充电 LED 修正（2026-09-10 画图前复核）：DS1 共阳极应接 **3V3** 而不是 `5V_OR`。原因是 CHRG/STDBY 为开漏脚且被 10kΩ 拉到 3.3V 时，若 LED 阳极接 5V，LED 两端仍有约 1.7V 压差，红色 LED 可能微亮。此修正已同步 DESIGN/BOM/SCHEMATIC_CHECKLIST。
+- EDA 自动化方案切换（2026-09-10）：弃用 `Run API Gateway` 裸 JS 网关，改用社区 `easyeda-agent`（MIT，typed action + 审计 + 回读校验）。已安装 `v1.4.8` CLI、Skill、daemon；连接器包备份在 Downloads。该方案最终仍通过 EasyEDA 官方 `eda.*` 扩展 API 操作，不直接改 `.eprj2`。
+- 用户按键 ×2 确认添加（2026-09-10，功能待定）：GPIO7=BTN1、GPIO16=BTN2。分配后干净空闲 GPIO 仅剩 2 根（GPIO17/18）——**已触发强警戒**，后续扩展建议走 I2C GPIO 扩展器（PCF8574，复用现有总线）。
+- 交互与传感定稿（2026-09-10 用户确认）：**旋转编码器（带按压，GPIO4/5/6）+ SHT30（I2C 复用，0 脚）**；PIR 暂缓不占脚。编码器调音量经 UART→BT 模块，AVRCP 与电脑/手机三向同步。至此功能清单齐：墨水屏/SD/双Type-C/电池+电量计/蓝牙音箱/编码器/SHT30。引脚全部锁定，干净空闲剩 4 根（GPIO7/16/17/18）+ 3 根 strapping。初版 BOM 已出（`docs/BOM.md`），下一步画原理图。
+- 蓝牙音箱架构定稿（2026-09-10 用户确认）：**ESP32-S3 + 专用蓝牙音频芯片**（对比过老 ESP32 单芯片方案：共存冲突、CPU 争抢、无原生 USB/PSRAM 劣势，故弃）。引脚 GPIO38–42/47/48 已从候选转锁定。手机/电脑均走标准 A2DP，通吃。
+- 音质档次确认（2026-09-10）：**有一定要求、不要「听个响」（中上档）**——BT 芯片须支持 AAC、优先 I2S 输出；功放选 I2S 数字输入 D 类（MAX98357A 类）；喇叭 ≥40mm 8Ω 3W 起步；音频区星型接地。
+- 喇叭定稿（2026-09-10 用户确认）：**50mm / 8Ω / 3W 全频（B 档）**；板子尺寸无特殊要求，预留 ≥50×50mm 安装位与 ≥15mm 腔体深度。
+- 电池定稿（2026-09-10 用户确认）：**上锂电池 + MAX17048 电量计**——1S 软包 2000–2500mAh，Type-C 充电，电池→buck-boost→3.3V，功放直接取电池电压；电量百分比上墨水屏；I2C 用 GPIO1/2。
+- 蓝牙方案全部定稿（2026-09-10 用户确认路线 A）：**杰理 AC6956 现成模块**（KT1025A 类，免固件免天线，UART 控制 + 模拟输出 + 状态脚）。音频链：模块模拟输出 → 模拟开关 ← S3+PCM5102 DAC → NS4162 D 类功放 → 50mm 8Ω 3W 喇叭。整机功能清单（墨水屏/SD/双Type-C/电池+电量计/蓝牙音箱）已齐，下一步出整板 BOM 与原理图。
+- 蓝牙音箱功能确认添加（2026-09-10 用户提出）：**ESP32-S3 仅支持 BLE、无经典蓝牙/A2DP，不能独立实现蓝牙音箱**——必须外加专用蓝牙音频芯片（A2DP sink）+ 功放 + 喇叭；ESP32-S3 负责连接/断开事件检测与定制语音播报（SD/Flash 存 MP3，I2S→DAC→音频开关→功放）。候选引脚 GPIO38–42/47/48 已写入 `docs/PIN_MAP.md`；分配后普通空闲 GPIO 约 18 根（仍充裕）。
+- 主控方案定稿（2026-09-10 用户确认）：**ESP32-S3-WROOM-1-N16R8**（现成模组，16MB Flash + 8MB 八线 PSRAM）——GPIO26–32（Flash）与 GPIO33–37（PSRAM）不可用、模组天线区留净空、外围只需 3.3V/EN/GPIO0 启动电路。
+- SD 卡接口确认采用（2026-09-10 用户拍板）：**方案 A 共享 SPI2**——CLK/MOSI 复用墨水屏 GPIO12/11，新增 MISO=GPIO21、SD_CS=GPIO8；用于人物角色图片库。当前普通空闲 GPIO 约 25 根（水位充裕）。
+- 用户确认硬件资源保留决策（2026-09-10）：**保留双 Type-C**（COM 口 = GPIO43/44 经 USB-UART 桥接芯片；USB 口 = GPIO19/20 原生 USB），两个口都要 CC 下拉与 5V 电源路径防倒灌；GPIO0 BOOT、EN 复位等其余建议保留资源也尽量不动。用户要求 Codex 在后续功能扩展中监控引脚水位，紧张时主动提醒（阈值见 `docs/PIN_MAP.md` 资源水位提醒机制）。
+- 应对「未来墨水屏可能是双 CS」的风险（2026-09-10 用户提出）：PCB 预留 **GPIO15 = E-INK CS2**，墨水屏连接器多留一个 CS2 脚位；当前单 CS 屏悬空不用，双 CS 屏只改固件。零成本规避换屏风险。
+- 当前固件对 ESP32-S3 的 GPIO 占用仅墨水屏 6 根（GPIO9–14，已扫描整个固件工程确认无其他 GPIO/I2C/UART 外设占用）；UART 控制台走 GPIO43/44（ESP-IDF 默认），原生 USB 为 GPIO19/20。按 WROOM-1 N16R8 估算普通空闲 GPIO 约 28 根，详见 `docs/PIN_MAP.md`。
+- 用户提供固件交接并经源码核实；随后明确**屏幕型号/尺寸可变、硬件接口不变**：PCB 按 SSD1680 类带驱动板模块的通用 SPI 接口（VCC/GND/DIN/CLK/CS/DC/RST/BUSY）设计，GPIO9–14 分配保持不变，换屏只改固件几何与波形参数。
+- 显示模块：2.13" `YMS122250-0213BAAMFGN`，250×122 横屏，黑白红三色，SSD1680 兼容，仅完整刷新（约 21 s，闪烁正常，不支持快刷/局部刷）。边缘杂色已由 border waveform 0x05 解决。
+- 墨水屏引脚（已对照 `esp32_s3_eink_test\components\eink\src\eink_driver_bus.c` 核实）：GPIO9=DC、GPIO10=CS、GPIO11=MOSI、GPIO12=CLK、GPIO13=BUSY、GPIO14=RST；无 MISO/CS2；BUSY 无上拉、10 ms 轮询、30 s 超时；RST 脉冲 20 ms。
+- SPI：SPI2_HOST、Mode 0、4 MHz、硬件 CS、DMA、单次最大 4000 字节（已对照源码核实）。
+- 帧缓存：每平面 16 字节/行 × 250 行 = 4000 B，双平面共 8000 B；颜色映射 白=BW1/R1、黑=BW0/R1、红=BW1/R0。
+- 控制器初始化参数（已对照 `eink_driver_controller.c` 核实）：Booster 8B 9C 96 0F；Driver output 249,0x00；Data entry 0x03；RAM X 0x00~0x0F；RAM Y 0x0000~0x00F9；Border 0x05；Temp 0x80；Update ctrl1 0x80,0x80；Update ctrl2 0xF7（完整刷新）。
+- UART 控制台当前使用 GPIO43/44；原生 USB 为 GPIO19/20（来自固件交接，需硬件确认保留哪种下载方式）。
+- **嘉立创EDA专业版客户端有三种运行模式**（右键菜单 →「客户端设置」→「运行模式设置」）：全在线模式（工程和库存服务器，即用户当前模式）、半离线模式（工程和库存本地、支持在线系统库）、全离线模式（工程和库存本地、不支持在线系统库）。三种模式定义来自客户端 `assets/js/translate.js` 与 `dialog.template.js`（`clientModeEnum: ONLINE / HALF_OFFLINE / OFFLINE`）。
+- 只有在半离线/全离线模式下，工程才会以 `.eprj2` 保存到「客户端设置 → 工程路径」；全在线模式下「另存为」只能导出 `.epro2` 压缩包，没有 `.eprj2` 选项——这解释了用户「另存的工程格式没有 .eprj2」的疑问。
+- 切换模式的入口：在客户端**右键菜单** →「客户端设置」（主进程 `app.js` 的 `templateMenuSetting` 中 `label_client_setting` 挂在右键菜单里，点击后经 `/pro-ui/setting/open` 打开设置对话框）。修改后软件会弹「是否立即重新启动程序？」，需重启生效。
+- 主进程内置限制：「不能在工程离线模式打开在线工程文件」（`MSG_CANNOT_OPEN_ONLINE_DOCUMENT_ON_OFFLINE`）——切换到离线模式后，之前的云端工程打不开，需用 `.epro2` 重新导入或新建工程。
+- 嘉立创 EDA 客户端为 `D:\lceda-pro\lceda-pro.exe`（V3.2.175），当前窗口标题即 `esp32-s3-eink-hardware`。
+- 客户端配置 `C:\Users\Admin\Documents\LCEDA-Pro\config.json` 中 `"type": "ONLINE"`：当前为云端模式，工程数据存于嘉立创服务器（pro.lceda.cn），本地没有可直接浏览的工程文件。
+- 本地工程的存放目录（config 的 `APP_PROJECT_DIR`）：`C:\Users\Admin\Documents\LCEDA-Pro\projects`，目前只有 2026-08-16 的旧工程 `New Project_2026-08-16_03-31-30.eprj2`，无当前工程。
+- `.epro2` 是 ZIP 容器：内含 `project2.json`（152B 元数据）与 `esp32-s3-eink-hardware.epru`（97.6KB 纯文本）。
+- `.epro2` 是导出/导入用的工程源文件包，**不能**作为工程直接打开（双击只会启动客户端、不加载内容）；可直接打开编辑的本地工程文件是 `.eprj2`。用户 2026-09-10 02:04 左右再次导出了 `.epro2`，但尚未创建任何 `.eprj2`。
+- `.epru` 每行为 `header||payload|` 成对 JSON；DOCHEAD 行按 `docType` 分段（SYMBOL/DEVICE/BOARD/SCH/SCH_PAGE/PCB/CONFIG/PANEL/BLOB），共 202 行、9 个文档段。
+- `.eprj2` 本地工程文件是 SQLite 数据库（非 ZIP），可用 Python `sqlite3` 以只读模式解析；`database\web.db` 是客户端内部缓存（当前 projects 表为空），禁止直接修改。
+- 原理图页 `P1` 唯一元件为标题栏 `Drawing-Symbol_A4`（partId `pid8a0e77bacb214e`），无任何电路元件或网络。
+- PCB `PCB1` 无任何几何对象：无板框、无封装、无网络、无走线，仅层定义与规则。
+- 工程创建/更新时间为 2026-09-10 01:31:35，EasyEDA 编辑器版本 3.2.175。
+- 仓库当前不是 git 仓库（无 `.git` 目录）。
+
+## Open Questions
+
+- ~~【当前唯一阻塞】用户何时开始阶段 1 落图~~ **已解除（2026-09-11 00:44 首次保存 P1，U1 + 去耦 + EN RC 已核对通过）**。
+- 墨水屏接口连接器形式与真实脚位顺序（按「带驱动板模块 + 通用接口」工作假设，仍需实物核对；若未来改裸屏则需高压驱动电源，当前不按裸屏设计）。
+- 目标可换屏的尺寸上限（决定 3.3V 轨按多大刷新峰值电流留余量）。
+- 是否保留测试点与维修接口？
+- AC6956 蓝牙模块的具体型号（UART 协议与状态脚定义随模块而定）——已在 BOM「待设计时复核」，阶段 3 前必须敲定。
+- 用户抄的参考设计是哪一份（开源链接/型号）？拿到后可对照原版参数。
+
+## Recommended Next Steps
+
+1. **用户继续画阶段 1 剩余部分**（封装策略已定：全板 0603/0805，电源大容量 0805/1206，不沿用参考图 0402）：① 补 EN 复位按键、GPIO0 10 kΩ 上拉 + BOOT 按键、GPIO35/36/37 打 NC 标记 → ② 双 Type-C（J3/J4）+ ESD + 防倒灌 → ③ U10 CH340N → ④ 电源链（U5 TP4056 → U6/U7 保护 → U8 TPS63020 → U9 MAX17048）→ ⑤ DS1 充电指示。
+2. **画完一块就 `Ctrl+S`，agent 用 `easyeda sch read` 读活体网表核对**（不依赖 `.eprj2` 的 `documents` 表）。每块核对项：器件位号/型号/封装、网表与 `PIN_MAP.md` 一致性、悬空引脚、零长度导线、电源取值。
+3. **约定（2026-09-11 用户确认）**：用户先全用大封装画完，agent 之后统一检查并指出"哪些地方建议用小封装"。检查重点 = 调谐/高频类电容、ESD/TVS 与 IC 的封装（不可换）、板边应力区。
+4. 阶段 1 通过后进入阶段 2「墨水屏 + SD 卡」，再到阶段 3「音频」、阶段 4「交互与传感器」。
+5. 原理图完成后导入 PCB：画板框 → 布局 → 布线 → DRC。期间产生新结论时回填本文件；不要手改 `.epro2`/`.epru`，也不要在 EDA 打开工程时改动 `.eprj2`/`web.db`。
+
+## How To Resume In A New Chat
+
+使用：
+
+`使用 project-handoff-resume，然后继续这个工程。`
+
+如果技能不可用，使用：
+
+`先读 CODEX_PROJECT_PROMPT.md、docs/PROJECT_MAP.md、docs/HANDOFF.md，再继续这个工程，不要从头重新阅读。`

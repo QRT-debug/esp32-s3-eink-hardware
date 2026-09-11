@@ -1,0 +1,50 @@
+# Project Prompt
+
+## Purpose
+
+ESP32-S3 驱动电子墨水屏（e-ink）的硬件设计工程，使用嘉立创 EDA 专业版（EasyEDA Pro）。当前为新建空白骨架，设计目标、方案对比与推荐 BOM 思路见 `docs/DESIGN.md`。
+
+## Reading Priorities
+
+1. `docs/HANDOFF.md`（最新状态、已确认结论、未决问题）
+2. `docs/DESIGN.md`（硬件设计简报与方案选型）
+3. `docs/PROJECT_MAP.md`（工程文件结构与 `.epro2` 解析方法）
+4. `ProPrj_esp32-s3-eink-hardware_2026-09-10.epro2`（EasyEDA 工程本体，只读参考）
+
+## Runtime Facts
+
+- 无软件运行时；目标硬件为 ESP32-S3 电子墨水屏主板（尚未设计）。
+- 设计工具：EasyEDA Pro，编辑器版本 3.2.175。
+- 当前唯一原理图页为 `P1`，唯一 PCB 为 `PCB1`，二者均为空白骨架。
+
+## Important Distinctions
+
+- `.epro2` 是 ZIP 容器，内部 `*.epru` 为自定义成对 JSON 文本格式。
+- `.eprj2` 是本地工程文件（SQLite 数据库）；用户当前打开的是云端工程，与仓库里的 `.epro2` 导出快照不互通。
+- 电路与 PCB 编辑必须在 EasyEDA Pro GUI 中完成；脚本仅做只读解析与校验。
+- `docs/DESIGN.md` 是规划文档，尚未落实到原理图。
+
+## Watchouts
+
+- 禁止手改 `.epro2` / `.epru` 内部 JSON，容易损坏工程。
+- 禁止在 EDA 打开工程时改动 `.eprj2` 或 `database\web.db`。
+- 屏幕型号/驱动方案是第一阻塞决策，未确定前不要开始绘制原理图。
+- 交接文件必须随实质性工作同步更新。
+
+## Continuation Workflow
+
+在开始新会话时：
+
+1. 若本地技能 `project-handoff-resume` 可用，则使用它。
+2. 读本文件。
+3. 读 `docs/PROJECT_MAP.md`。
+4. 读 `docs/HANDOFF.md`。
+5. 从最后一个未决问题继续，不要从头重新勘察仓库。
+
+## Closeout Workflow
+
+实质性工作结束后、结束回合前刷新仓库记忆：
+
+1. 若结论、未决问题或下一步建议发生变化，更新 `docs/HANDOFF.md`。
+2. 若稳定架构理解发生变化，更新 `docs/PROJECT_MAP.md`。
+3. 仅当默认阅读顺序或仓库工作流变化时，才更新本文件。

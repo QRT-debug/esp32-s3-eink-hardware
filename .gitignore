@@ -1,0 +1,11 @@
+# WorkBuddy 会话数据（记忆、日志、临时导出、EDA 工件）——不入库
+.workbuddy/
+
+# 操作系统杂项
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# 编辑器/工具临时文件
+*.tmp
+*~

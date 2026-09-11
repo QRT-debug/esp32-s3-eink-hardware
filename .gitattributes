@@ -1,0 +1,19 @@
+# 换行策略：本仓库文件均由 agent 写出（两侧都产 LF），统一钉成 LF
+# 避免 git 每次检出都改写文件、造成工作区来回不一致。
+* text=auto eol=lf
+
+# 仅 Windows 批处理保留 CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# 二进制资源不做换行转换
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.pdf binary
+*.step binary
+*.stp binary
+*.epro2 binary
+*.eprj2 binary
