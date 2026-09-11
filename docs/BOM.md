@@ -47,7 +47,7 @@
 | 位号 | 器件 | 规格 | 数量 | 备注 |
 | --- | --- | --- | --- | --- |
 | J3/J4 | USB Type-C 母座 | 16P 卧贴 | 2 | 口 1=COM，口 2=USB；CC1/CC2 各 5.1 kΩ 下拉 |
-| U10 | CH340N | USB-UART 桥接 | 1 | **立创 C2977777**（WCH 原厂，SOP-8）；**VCC/V3（脚 8）短接同接 3V3，不接 5V_OR**；C12 0.1 µF 去耦；TX/RX 交叉（TXD→GPIO44/RXD0、RXD→GPIO43/TXD0）；RTS# NC；**接法已核对通过（画布暂记 U4，待改名 U10）** |
+| U10 | CH340N | USB-UART 桥接 | 1 | **立创 C2977777**（WCH 原厂，SOP-8）；**VCC/V3（脚 8）短接同接 3V3，不接 5V_OR**；C12 0.1 µF 去耦；TX/RX 交叉（TXD→GPIO44/RXD0、RXD→GPIO43/TXD0）；RTS# NC；**接法已核对通过（画布位号已改 U10，RTS# 自带 NC 叉号）** |
 | U11/U12 | USBLC6-2SC6 | USB ESD 保护 | 2 | **SOT-23-6 封装即性能，不可换封装/替代型号** |
 
 ### 交互与传感
