@@ -126,6 +126,7 @@
 - **双 USB-C（已确认）**：Type-C 1 = COM 口（GPIO43/44 经 USB-UART 桥接芯片，下载/日志）；Type-C 2 = USB 口（GPIO19/20 原生 USB，下载/供电）。两口均需 CC1/CC2 各 5.1kΩ 下拉 + ESD 保护（如 USBLC6-2SC6）；两路 5V 输入需电源路径防倒灌（理想二极管/PMOS）。
 - **3.3V 电源**：DC-DC buck（≥1A，建议按 1.5–2A 预算），覆盖 WiFi 发射峰值与屏幕刷新瞬态。
 - **启动/复位**：EN 引脚 RC 复位电路 + 复位按键；GPIO0 BOOT 按键；注意 GPIO45/GPIO46 等 strapping 引脚上/下拉。
+- **GPIO3 JTAG 来源 strap（2026-09-12 决策：不设）**：复位时 GPIO3 低=JTAG 走内置 USB-Serial-JTAG（默认，内部下拉）、高=走外部四线（GPIO39-42）。本板调试/下载全走 USB-Serial-JTAG（路线 A），且 GPIO39-42 已分配给音频链路——**GPIO3 保持空、不加 10k 上拉 + 0Ω 选择电路**；将来若要外置硬件 JTAG，再评估（可用 0Ω/NC 组合做选配，同时需腾出 GPIO39-42）。
 - **调试**：UART 排针（TXD0=GPIO43，RXD0=GPIO44）；也可用原生 USB（GPIO19=DM，GPIO20=DP）烧录。
 - **状态指示**：WS2812 RGB LED（常用 GPIO48）；至少一个用户按键。
 - **SD 卡（已确认）**：microSD 卡座，共享 SPI2（CLK=GPIO12、MOSI=GPIO11、MISO=GPIO21、CS=GPIO8），存人物角色图片库；3.3V 供电，CS/MISO 上拉。
