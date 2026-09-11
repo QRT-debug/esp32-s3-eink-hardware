@@ -67,7 +67,7 @@ EasyEDA 的检查器有时会报 `零长度导线（首尾坐标相同，不连�
 | U11/U12 | USBLC6-2SC6 | 两路 USB ESD 保护 |
 | J3/J4 | USB Type-C 16P | COM 口 / 原生 USB 口 |
 | D1/D2 | SS34 | 两路 5V 防倒灌 OR |
-| SW2/SW3 | 轻触开关 ×2 | BOOT（GPIO0，R5 10 kΩ 上拉）/ RST（EN） |
+| BOOT1 / EN1 | 轻触开关 ×2 | BOOT（GPIO0，R5 上拉）/ RST（EN）；画布位号 BOOT1/EN1（2026-09-12 核对通过） |
 | DS1 | 红/绿双色共阳 LED | 充电 / 充满指示 |
 
 ### 电源网络
@@ -163,7 +163,7 @@ EasyEDA 的检查器有时会报 `零长度导线（首尾坐标相同，不连�
 ## 阶段 4：交互与传感器
 
 - SW1 EC11：A/B/SW 接 GPIO4/5/6，公共端接 GND，必要时加 RC 滤波。
-- SW4/SW5：分别接 GPIO7/GPIO16，另一端接 GND，使用内部上拉。
+- SW3/SW4（画布位号，原计划 SW4/SW5）：分别接 GPIO7/GPIO16，另一端接 GND，使用内部上拉。
 - U13 SHT30：接 `I2C_SDA` / `I2C_SCL`，地址脚按模块/封装要求处理。
 - I2C 总线保留 `4.7kΩ` 上拉到 `3V3`，不要每个器件重复放多组上拉。
 
