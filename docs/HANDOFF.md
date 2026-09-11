@@ -116,7 +116,7 @@
 
 ## Recommended Next Steps
 
-1. **阶段 2：墨水屏 J1 + SD 卡 J2**（封装策略全板 0603/0805）：J1 = 8P 2.54mm 排针（通用墨水屏接口：3V3/GND/DIN(GPIO11)/CLK(GPIO12)/CS(GPIO10)/DC(GPIO9)/RST(GPIO14)/BUSY(GPIO13)，脚序以实物屏为准）；J2 = microSD 自弹卡座（SPI2 共享：CLK=GPIO12、MOSI=GPIO11、CS=GPIO8、MISO=GPIO21 + 3V3/GND + C15 0.1µF；SD_CS/MISO 上拉待定）。**节奏同阶段 1：我出图和接线表 → 用户画 → Ctrl+S → 我核对。**
+1. **阶段 2：墨水屏（路线 C 双兼容，2026-09-12 定）**：① J1 = 8P 2.54mm 排针（3V3/GND/DIN=GPIO11/CLK=GPIO12/CS=GPIO10/DC=GPIO9/RST=GPIO14/BUSY=GPIO13）——接带驱动板模块；② 24P 0.5mm FPC 座 + 裸屏驱动电路（GDR NMOS/RESE/泵电容等）**全部按 DNP 预留**——接手上的 YMS122250 裸屏；J1 与 FPC 驱动共用 SPI 信号，**默认只焊 J1**。J2 = microSD 自弹卡座（SPI2：CLK=GPIO12、MOSI=GPIO11、CS=GPIO8、MISO=GPIO21 + 3V3/GND + C15）。**节奏同阶段 1：出图 → 画 → 核对。**
 2. **画完一块就 `Ctrl+S`，agent 用 `easyeda sch read` 读活体网表核对**（不依赖 `.eprj2` 的 `documents` 表）。每块核对项：器件位号/型号/封装、网表与 `PIN_MAP.md` 一致性、悬空引脚、零长度导线、电源取值。
 3. **约定（2026-09-11 用户确认）**：用户先全用大封装画完，agent 之后统一检查并指出"哪些地方建议用小封装"。检查重点 = 调谐/高频类电容、ESD/TVS 与 IC 的封装（不可换）、板边应力区。
 4. 阶段 1 通过后进入阶段 2「墨水屏 + SD 卡」，再到阶段 3「音频」、阶段 4「交互与传感器」。
