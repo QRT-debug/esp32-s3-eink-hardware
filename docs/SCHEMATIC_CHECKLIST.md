@@ -67,7 +67,7 @@ EasyEDA 的检查器有时会报 `零长度导线（首尾坐标相同，不连�
 | U11/U12 | USBLC6-2SC6 | 两路 USB ESD 保护 |
 | J3/J4 | USB Type-C 16P | COM 口 / 原生 USB 口 |
 | D1/D2 | SS34 | 两路 5V 防倒灌 OR |
-| SW2 | 轻触开关 ×2 | BOOT / RST |
+| SW2/SW3 | 轻触开关 ×2 | BOOT（GPIO0，R5 10 kΩ 上拉）/ RST（EN） |
 | DS1 | 红/绿双色共阳 LED | 充电 / 充满指示 |
 
 ### 电源网络
