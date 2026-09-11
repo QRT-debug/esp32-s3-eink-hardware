@@ -61,7 +61,7 @@ EasyEDA 的检查器有时会报 `零长度导线（首尾坐标相同，不连�
 | U5 | TP4056 | 1S 锂电池充电 |
 | U6 | DW01A + 外围电阻/电容 | 电池保护控制 |
 | U7 | FS8205 | 电池保护 MOS |
-| U8 | TPS63020 | VBAT → 3.3V buck-boost |
+| U2 | TPS63021（固定 3.3 V） | VBAT → 3.3V buck-boost |
 | U9 | MAX17048 | I2C 电量计 |
 | U10 | CH340N | Type-C COM 口 |
 | U11/U12 | USBLC6-2SC6 | 两路 USB ESD 保护 |
@@ -74,7 +74,7 @@ EasyEDA 的检查器有时会报 `零长度导线（首尾坐标相同，不连�
 
 - `VBUS1`：J3 Type-C VBUS → D1 阳极。
 - `VBUS2`：J4 Type-C VBUS → D2 阳极。
-- `5V_OR`：D1/D2 阴极汇合，供 TP4056 VCC 与 CH340N VCC。
+- `5V_OR`：D1/D2 阴极汇合，供 TP4056 VCC。**CH340N VCC 不接 5V_OR（2026-09-12 修正：IO 电平跟随 VCC，5 V 会损坏 ESP32-S3）——接 `3V3`，V3 短接 VCC，详见 DESIGN.md「CH340N COM 口定稿」。**
 - `VBAT`：电池正端、TP4056 BAT、TPS63020 VIN、MAX17048 Cell+、功放电源入口共用；电池负端经 DW01A + FS8205 保护后接系统 GND。
 - `3V3`：TPS63020 输出，供 ESP32-S3、SD、墨水屏接口、I2C、音频小信号等。
 - `GND`：公共地；后续 PCB 音频区做星型接地。
@@ -82,7 +82,7 @@ EasyEDA 的检查器有时会报 `零长度导线（首尾坐标相同，不连�
 ### 双 Type-C 要求
 
 - J3/J4 的 CC1、CC2 各接一个 `5.1kΩ` 下拉到 GND。
-- J3 的 D+/D- 经 U11 后接 CH340N 的 UD+/UD-。
+- J3 的 D+/D- 经 U11 后接 CH340N 的 UD+/UD-（网络名 **`COM_DP`/`COM_DM`**，与 U1 原生 USB 的 `USB_DP`/`USB_DM` 区分，禁止同名并网）。
 - J4 的 D-/D+ 经 U12 后接 U1 的 GPIO19/GPIO20。
 - CH340N 的 TXD/RXD 接 U1 的 GPIO44/GPIO43，注意 TX/RX 交叉。
 - 两路 VBUS 都必须经过 SS34 或等效理想二极管后汇成 `5V_OR`，禁止直接短接。
@@ -131,8 +131,8 @@ EasyEDA 的检查器有时会报 `零长度导线（首尾坐标相同，不连�
 | GPIO40 | `BT_STATUS` | 蓝牙连接状态 |
 | GPIO41 | `AMP_EN` | 功放使能 |
 | GPIO42 | `BT_UART` | 蓝牙模块 UART |
-| GPIO43 | `U0TXD` | COM 串口发送 |
-| GPIO44 | `U0RXD` | COM 串口接收 |
+| GPIO43 | `TXD0` | COM 串口发送（画布网络名，2026-09-12 核对定稿；即 U0TXD） |
+| GPIO44 | `RXD0` | COM 串口接收（画布网络名；即 U0RXD） |
 | GPIO47 | `I2S_BCLK` | 播报位时钟 |
 | GPIO48 | `I2S_LRCK` | 播报帧时钟 |
 
@@ -155,9 +155,9 @@ EasyEDA 的检查器有时会报 `零长度导线（首尾坐标相同，不连�
 ## 阶段 3：音频
 
 - MOD1 AC6956：供电、GND、UART、状态脚、模拟左右声道输出。
-- U2 PCM5102A：接 GPIO38/47/48 的 I2S，输出播报音频。
-- U3 TS5A23157：在 AC6956 与 PCM5102A 之间切换音源，由 GPIO39 控制。
-- U4 NS4150：音频功放，电源直接取 `VBAT` 并经磁珠/RC 与数字电源隔离，使能接 GPIO41。
+- U14 PCM5102A：接 GPIO38/47/48 的 I2S，输出播报音频。（2026-09-12 位号重排：画布 U2=TPS63021、U3=TP4056，音频 IC 顺延为 U14/U15/U16）
+- U15 TS5A23157：在 AC6956 与 PCM5102A 之间切换音源，由 GPIO39 控制。
+- U16 NS4150：音频功放，电源直接取 `VBAT` 并经磁珠/RC 与数字电源隔离，使能接 GPIO41。
 - 喇叭输出预留焊接端子或测试点，PCB 阶段再定最终接口。
 
 ## 阶段 4：交互与传感器
