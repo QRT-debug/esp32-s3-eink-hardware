@@ -9,7 +9,9 @@
   - 网表：`VBAT = U2.1(VINA)+10+11(VIN)+12(EN)+C4.2+C5.2+C6.2`；`3V3 = U2.3(FB)+4+5(VOUT)+C7.2+C8.2+C9.2+U1.2+C1.2+C2.2+R1.2`；`GND = U2.2+U2.13(PS/SYNC)+U2.15(PowerPAD)+C3/C2/C1/C6/C7/C8/C9/C5/C4.1+U1.1/40/41`；`EN = U1.3+R1.1+C3.2`；电感正确跨接 `U2.6/7 —L3— U2.8/9`。**FB 直接接 3V3、PS/SYNC 接 GND、PowerPAD 接 GND、PG 悬空，全部符合设计。**
   - **4 个非连接标识（NC 叉号）已确认存在**（导出的矢量 SVG 中查到 4 个 8×8 的 X 形 path，位置对应 U1.28/29/30 三个相邻脚 + U2.14）。
 - **ESP32 段与官方推荐已对齐**：官方 WROOM-1 数据手册 Figure 7 典型应用图为 **22 µF + 0.1 µF**（EN 处另有 0.1 µF；EN 的 RC 按注释为 10 kΩ + 1 µF）。本板 C1 = 22 µF ↔ 官方 C1、C2 = 0.1 µF ↔ 官方 C3、C3 + R1 ↔ 官方 EN RC，**已一致，无需改动**。
-- **唯一遗留**：**2 条零长度导线**待删——这是 `easyeda sch check` 目前 `passed=false` 的唯一原因（其余计数项全 0）。位置 (590,1035) 与 (1090,1125)，都正好压在 GND 网络标号上（肉眼看不见），已用 `sch select --ids` 高亮过。**不影响网表**（39 个网络全部正确），属装饰性告警；若删除后反复出现，可试删掉该 GND 标号重新放置。
+- **⚠️ 2 条「零长度导线」是正常结构，不要删（2026-09-11 用户指出，我先前判断错误）**：位置 (590,1035) 与 (1090,1125)，**它们就是那两个 GND 网络标号的接点**。删掉后对应 GND 网络立刻掉线（用户实测确认）；而且删了会重长——三次删除后是三个全新的图元 ID，坐标始终不变。用户的 EasyEDA DRC 对此无告警。**`easyeda sch check` 报的 `zero-length-wire` 在本工程属误报，`passed=false` 可以忽略。**
+- **教训**：① 「渲染图逐像素比对一致」**不能**证明连接性未变（图形完全一致但电气已断开）；判断连接性必须看网表。② 不要因为检查器报错就动手删图元，先确认它是否承载连接。
+- **工程快照已入库**：`snapshots/esp32-s3-eink-hardware.eprj2`（固定文件名，每次覆盖更新，历史由 git 保存）+ `snapshots/README.md` 说明还原方法。源文件在 `C:\Users\Admin\Documents\LCEDA-Pro\projects\`，**不在仓库内**，快照是唯一进版本库的副本。
 - **⚠️ 工具已知故障**：`easyeda sch read` 会瞬时报「0 网络 / 78 引脚悬空」，此时 `check.passed` 会变成 `True`（假通过）。**遇到空网表先怀疑工具**：用 `sch export-image --format png` 渲染确认图形完好、或对比两次导出 SVG 的图元计数；让用户重新 `Ctrl+S` 一次通常即可恢复（本轮已验证）。另外 `easyeda doc reload` 会导致 EasyEDA 重新分配图元 ID，故「ID 变了」不能证明图元被改动。
 - **仓库已纳入 git 并推送到 GitHub（2026-09-11）**：远端 `https://github.com/QRT-debug/esp32-s3-eink-hardware.git`，分支 `main`，首提交 `859ccee`（叠在远端自带 `3a50caf Initial commit` 之上）。`.workbuddy/` 已随 `.gitignore` 排除。**以后每次实质性工作结束，除刷新交接文件外，还应把文档改动提交并推送**——这也是防止工程内容丢失的兜底。
 
