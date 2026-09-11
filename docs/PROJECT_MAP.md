@@ -76,7 +76,10 @@
   - 首个提交 `859ccee`（9 文件 / 1044 行，工程文档与交接文件），叠在远端自动生成的 `3a50caf Initial commit`（仅 `README.md`）之上。
   - `.workbuddy/` 已随 `.gitignore` 排除（会话数据、日志、EDA 导出工件不入库）；`.gitattributes` 统一 `eol=lf`。
   - 本机用**系统 Git**（`C:\Program Files\Git\cmd\git.exe`，2.52）+ GCM（`credential.helper=manager`），github.com 凭据已存在，**无需重新授权**。
-  - **从 agent 侧跑 git 时会遇到两个坑**：① 沙箱注入 `HTTP_PROXY`/`HTTPS_PROXY`（如 `127.0.0.1:57153`）会挡住 github，**必须在干净环境里运行**（剔除全部 proxy 变量；实测直连可用，无需配 `http.proxy`）；② **`refs/remotes/origin/*` 引用文件不落地**，会导致 `git status` 显示 `[gone]`——修法是手动写 `.git/refs/remotes/origin/main`（内容为 `git rev-parse HEAD`）。
+  - **从 agent 侧跑 git 时会遇到两个坑**：① 沙箱注入 `HTTP_PROXY`/`HTTPS_PROXY`（如 `127.0.0.1:57153`）会挡住 github，**必须在干净环境里运行**（剔除全部 proxy 变量）；② **`refs/remotes/origin/*` 引用文件不落地**，会导致 `git status` 显示 `[gone]`——修法是手动写 `.git/refs/remotes/origin/main`（内容为 `git rev-parse HEAD`）。
+  - **网络不稳定，直连与代理都要会试**：2026-09-11 实测中直连时而可用、时而 `Failed to connect … port 443` / `Recv failure: Connection was reset`；此时改走本机代理 `http://127.0.0.1:7897` 即可（实测可用）。**不要把 `http.proxy` 写进仓库配置**——用户的代理并非常开，写死会让他在自己终端里反而推不动。
+  - **每次推送后必须核实**：`git ls-remote origin main` 与本地 `rev-parse HEAD` 比对哈希；`push` 返回 0 不代表成功（本轮就遇到 push 报成功但随后查询失败的情况，靠哈希比对才确认真正落地）。
+  - **`.gitignore` 覆盖 `.workbuddy/`（会话数据）与 `.easyeda/`（easyeda-agent 导出工件）**，这两类都不入库。
 
 ## Known Suspicious Areas
 
