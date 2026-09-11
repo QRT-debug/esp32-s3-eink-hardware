@@ -72,7 +72,11 @@
 
 - 活跃：SCH_PAGE `P1`、PCB `PCB1`（均仍为空白骨架；2026-09-10 22:37 复核确认画布为空）。
 - 存在但无实际设计内容：BOARD、Panel、CONFIG 段（仅元数据壳）；`project_structures` 有 49 条历史版本快照，但内容均为空结构。
-- 仓库非 git 仓库（无 `.git`）。
+- 仓库**已于 2026-09-11 初始化为 git 仓库**，远端 `https://github.com/QRT-debug/esp32-s3-eink-hardware.git`，分支 `main`。
+  - 首个提交 `859ccee`（9 文件 / 1044 行，工程文档与交接文件），叠在远端自动生成的 `3a50caf Initial commit`（仅 `README.md`）之上。
+  - `.workbuddy/` 已随 `.gitignore` 排除（会话数据、日志、EDA 导出工件不入库）；`.gitattributes` 统一 `eol=lf`。
+  - 本机用**系统 Git**（`C:\Program Files\Git\cmd\git.exe`，2.52）+ GCM（`credential.helper=manager`），github.com 凭据已存在，**无需重新授权**。
+  - **从 agent 侧跑 git 时会遇到两个坑**：① 沙箱注入 `HTTP_PROXY`/`HTTPS_PROXY`（如 `127.0.0.1:57153`）会挡住 github，**必须在干净环境里运行**（剔除全部 proxy 变量；实测直连可用，无需配 `http.proxy`）；② **`refs/remotes/origin/*` 引用文件不落地**，会导致 `git status` 显示 `[gone]`——修法是手动写 `.git/refs/remotes/origin/main`（内容为 `git rev-parse HEAD`）。
 
 ## Known Suspicious Areas
 
