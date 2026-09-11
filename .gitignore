@@ -1,6 +1,9 @@
 # WorkBuddy 会话数据（记忆、日志、临时导出、EDA 工件）——不入库
 .workbuddy/
 
+# easyeda-agent 的导出工件（图片/PDF/网表等临时产物）——不入库
+.easyeda/
+
 # 操作系统杂项
 Thumbs.db
 desktop.ini
