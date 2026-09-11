@@ -84,6 +84,7 @@ EasyEDA 的检查器有时会报 `零长度导线（首尾坐标相同，不连�
 - J3/J4 的 CC1、CC2 各接一个 `5.1kΩ` 下拉到 GND。
 - J3 的 D+/D- 经 U11 后接 CH340N 的 UD+/UD-（网络名 **`COM_DP`/`COM_DM`**，与 U1 原生 USB 的 `USB_DP`/`USB_DM` 区分，禁止同名并网）。
 - J4 的 D-/D+ 经 U12 后接 U1 的 GPIO19/GPIO20。
+- 符号细节（C165948）：DP1+DP2 并为 D+、DN1+DN2 并为 D-；VBUS 两脚并接；SBU1/SBU2 打 NC；外壳 EH1-4 接 GND；USBLC6 的 5 脚接 3V3（沁恒要求）。
 - CH340N 的 TXD/RXD 接 U1 的 GPIO44/GPIO43，注意 TX/RX 交叉。
 - 两路 VBUS 都必须经过 SS34 或等效理想二极管后汇成 `5V_OR`，禁止直接短接。
 
