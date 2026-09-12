@@ -262,30 +262,20 @@ EasyEDA 的检查器有时会报 `零长度导线（首尾坐标相同，不连�
 
 泵拓扑（照 WeAct 参考，WeAct 用 AO3402+SS819WL+10µH）：VCI→L1(68µH)→SW；Q1 2N7002 D=SW/G=GDR/S=RESE 脚；RESE 脚→R15→GND；**D3: SW→VDH**；**C29: SW↔X 飞跨，D2: X→VGH**；**D1: X→VGL（负压级）**；VGH/VGL/VDL/VCOM/VSH2 各 1µF/25V 对地。要点：① BS 必须接 GND；② 二极管用肖特基；③ 焊接顺序：先 FPC 座+去耦，试屏再补泵区；④ 原理图已出（v1.1），待画布绘制+网表核对。
 
-**J6 驱动区元件级接线表（画图操作单，2026-09-12）**——新增网络名：GDR、RESE、SW、X、VDH、VGH、VDL、VGL、VCOM、VSH2、VPP；注意 **L1 上端用 3V3 网名**（图 v1.1 中 VCI 旗标统一读作 3V3）：
+**J6 驱动区元件级接线表（v1.3 画图操作单，逐脚一列）**
 
-| 元件 | 脚 | 网络 | 元件 | 脚 | 网络 |
-| --- | --- | --- | --- | --- | --- |
-| J6.2 | GDR | GDR | Q1.1 (G) | 栅极 | GDR |
-| J6.3 | RESE | RESE | Q1.2 (S) | 源极 | RESE |
-| J6.5 | VSH2 | VSH2 | Q1.3 (D) | 漏极 | SW |
-| J6.8 | BS | **GND** | L1.1 | 上端 | **3V3** |
-| J6.9 | BUSY | GPIO13 | L1.2 | 下端 | SW |
-| J6.10 | RES# | GPIO14 | D3 | 阳/阴 | SW / VDH |
-| J6.11 | D/C# | GPIO9 | D2 | 阳/阴 | X / VGH |
-| J6.12 | CS# | GPIO10 | D1 | 阳/阴 | X / VGL |
-| J6.13 | SCL | GPIO12 | C29.1/2 | 飞跨 | SW / X |
-| J6.14 | SDA | GPIO11 | R15.1/2 | 检流 | RESE / GND |
-| J6.15 | VDDIO | 3V3 | C18/C20 | 去耦 | 3V3 / GND |
-| J6.16 | VCI | 3V3 | C19/C21 | 去耦 | 3V3 / GND |
-| J6.17 | VSS | GND | C22 | 储能 | VDH / GND |
-| J6.19 | VPP | VPP | C23 | 储能 | VGH / GND |
-| J6.20 | VDH | VDH | C24 | 储能 | VDL / GND |
-| J6.21 | VGH | VGH | C25 | 储能 | VGL / GND |
-| J6.22 | VDL | VDL | C26 | 储能 | VCOM / GND |
-| J6.23 | VGL | VGL | C27 | 储能 | VPP / GND |
-| J6.24 | VCOM | VCOM | C28 | 储能 | VSH2 / GND |
-| J6.25/26 | 定位脚 | **NC** | J6.1/4/18 | NC | 悬空 |
+J6（26 脚符号）：1=NC｜2=GDR｜3=RESE｜4=NC｜5=VSH2｜6=TSCL(空)｜7=TSDA(空)｜**8=BS→GND（必接）**｜9=BUSY→GPIO13｜10=RES#→GPIO14｜11=D/C#→GPIO9｜12=CS#→GPIO10｜13=SCL→GPIO12｜14=SDA→GPIO11｜15=VDDIO→3V3｜16=VCI→3V3｜17=VSS→GND｜18=NC｜19=VPP→VPP｜20=VDH→VDH｜21=VGH→VGH｜22=VDL→VDL｜23=VGL→VGL｜24=VCOM→VCOM｜25/26=定位脚→NC（勿接信号）
+
+Q1 2N7002（SOT-23：1=G、2=S、3=D）：G→GDR｜S→RESE｜D→SW
+L1 68µH：上端→3V3（勿新建 VCI 网）｜下端→SW
+D3 正泵：阳极→SW｜阴极→VDH
+D2 二级：阳极→X｜阴极→VGH
+D1 负泵：阳极→X｜阴极→VGL
+C29 飞跨：一端→SW｜另一端→X
+R15 0.47Ω：一端→RESE｜另一端→GND
+C18/C19：VCI 侧去耦→3V3 与 GND
+C20/C21：VDDIO 侧去耦→3V3 与 GND
+C22：VDH→GND｜C23：VGH→GND｜C24：VDL→GND｜C25：VGL→GND｜C26：VCOM→GND｜C27：VPP→GND｜C28：VSH2→GND
 
 标签形式：3V3/GND 用电源符号（延续全图惯例）；VXX 七个与 GDR/RESE/SW/X 用**普通网络标签**——电源符号形式会触发 ERC「电源未驱动」误报（VDL 等网络无驱动源），且箭头形状对负压网络有误导。⑤ 符号共 4 脚：1/2 信号 + **3/4 辅助定位焊脚（机械用，打 NC，勿接信号——若内部与触点导通，接错网会短路）**。
 
