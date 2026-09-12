@@ -89,6 +89,7 @@
 | J3/J4 | USB Type-C 母座 | **TYPE-C-31-M-12（C165948）** | 2 | 16P 卧贴（板边 Right-Angle SMD），USB2.0，5A/20V，插拔 1 万次；J3=COM（D±→U11→CH340N）、J4=USB（D±→U12→GPIO19/20）；DP1+DP2、DN1+DN2 各自并接；SBU1/SBU2 打 NC；外壳 EH1-4 接 GND；CC1/CC2 各 5.1 kΩ 下拉（R7–R10） |
 | U10 | CH340N | USB-UART 桥接 | 1 | **立创 C2977777**（WCH 原厂，SOP-8）；**VCC/V3（脚 8）短接同接 3V3，不接 5V_OR**；C12 0.1 µF 去耦；TX/RX 交叉（TXD→GPIO44/RXD0、RXD→GPIO43/TXD0）；RTS# NC；**接法已核对通过（画布位号已改 U10，RTS# 自带 NC 叉号）** |
 | U11/U12 | USBLC6-2SC6 | USB ESD 保护 | 2 | **SOT-23-6 封装即性能，不可换封装/替代型号**；1/6 串 D+、3/4 串 D-（流过式布局），5 脚→3V3（沁恒要求 ESD 正电压 3.3V），2 脚→GND；**立创 C2687116**（UMW USBLC6-2SC6，SOT-23-6）已放画布 |
+| TP1 | 测试点 | 板边 PCB 焊盘（可选） | 1 | **2026-09-13 新增（可选，成本≈0）**：引出 **MOD1.22(TXD)**——台架调试时接 USB-TTL 小板监听模块 AT 回执（+OK/+ERROR），量产检修也用得上；不占 GPIO |
 
 ### 交互与传感
 
