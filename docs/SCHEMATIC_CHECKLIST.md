@@ -273,6 +273,8 @@ D2 二级：阳极→X｜阴极→VGH
 D1 负泵：阳极→X｜阴极→VGL
 C29 飞跨：一端→SW｜另一端→X
 R15 0.47Ω：一端→RESE｜另一端→GND
+
+⚠️ SW 说明：SW=Switch Node（升压开关节点）的文字标注，不是开关元件、不是网络标签——L1 下端/Q1 漏极/D3 阳极/C29 上端四点就近导线直连即可，无需 SW 网络标签；若布局分开了必须用标签，命名 SW_NODE（避免与按键位号 SW3/SW4 联想混淆）。
 C18/C19：VCI 侧去耦→3V3 与 GND
 C20/C21：VDDIO 侧去耦→3V3 与 GND
 C22：VDH→GND｜C23：VGH→GND｜C24：VDL→GND｜C25：VGL→GND｜C26：VCOM→GND｜C27：VPP→GND｜C28：VSH2→GND
