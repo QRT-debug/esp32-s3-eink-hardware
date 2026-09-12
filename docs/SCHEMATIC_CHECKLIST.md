@@ -378,7 +378,7 @@ C22：VDH→GND｜C23：VGH→GND｜C24：VDL→GND｜C25：VGL→GND｜C26：VC
 | 19 | LED_A | → **GPIO40**（音频连接状态，高有效） |
 | 20 | LED_L | **NC**（BLE 状态，预留） |
 | 21 | RXD | ← **GPIO42**（S3 TX → 模块 RX，**AT 单线控制**） |
-| 22 | TXD | **NC**（无空闲 GPIO 做回读；状态反馈靠 19 脚 LED_A） |
+| 22 | TXD | → `BT_TXD` → **J8.1**（2026-09-13 变更：原 NC 改为引出调试排针）——J8 = 1×2P 2.54mm 直插（**C492401**，DNP 可选焊），J8.2→GND；台架插 USB-TTL **监听** AT 回执（只听不发，与 GPIO42 无冲突）；不焊排针 = 测试点焊盘，等效 NC。**画布动作：删掉 22 脚现有 NC 叉号 → 放 J8 → 1 脚挂 `BT_TXD`、2 脚接 GND** |
 | 24 | ANT | **NC**（默认用板载 PCB 天线，**勿动内部跳线电阻**；天线区 keep-out 见 PCB 注） |
 
 **U15 TS5A23157（DGS-10，TI 官方脚序：1 IN1 / 2 NO1 / 3 GND / 4 NO2 / 5 IN2 / 6 COM2 / 7 NC2 / 8 V+ / 9 NC1 / 10 COM1；IN=低→NC 通，IN=高→NO 通）**：
