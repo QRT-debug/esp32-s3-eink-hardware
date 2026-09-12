@@ -231,17 +231,17 @@ EasyEDA 的检查器有时会报 `零长度导线（首尾坐标相同，不连�
 | 符号脚 | 名称 | 接到 | 备注 |
 | --- | --- | --- | --- |
 | 1 | DAT2(RSV) | **NC** | SPI 模式不用 |
-| 2 | CDDAT3(CS) | **GPIO8** | SD_CS；R12 10kΩ 上拉到 3V3 |
+| 2 | CDDAT3(CS) | **GPIO8** | SD_CS；R13 10kΩ 上拉到 3V3（**待补画**） |
 | 3 | CMD(DI) | **GPIO11** | 与 J1 DIN(MOSI) 共网 |
 | 4 | VDD | **3V3** | C15 0.1µF + C16 10µF 去耦到 GND |
 | 5 | CLK(SCLK) | **GPIO12** | 与 J1 CLK 共网 |
 | 6 | VSS | GND | — |
-| 7 | DAT0(D0) | **GPIO21** | SD_MISO；R13 10kΩ 上拉到 3V3 |
+| 7 | DAT0(D0) | **GPIO21** | SD_MISO；R12 10kΩ 上拉到 3V3（已画布核对） |
 | 8 | DAT1(RSV) | **NC** | — |
 | 9 | CD | **NC** | 首版不做卡检测，固件轮询挂载 |
 | 10–13 | GND（外壳） | GND | 四脚全部接地 |
 
-要点：① CLK/MOSI 与 J1 共网（GPIO12/11），SD 独立 CS+MISO，与 BUSY（GPIO13 输入）不冲突——e-ink 等 BUSY 期间可自由读卡；② 上拉依据 = ESP-IDF SD SPI 驱动（CS 必须、MISO 建议）；③ 位号新用 R12/R13/C15/C16（画布已用到 R11/C14；R14 留 I2C SDA 上拉、R15 留 RESE、C17 缓冲、C18–C31 驱动区）；④ 原理图已出（J2·microSD 卡座图），待画布绘制 + 网表核对。⑤ 符号共 4 脚：1/2 信号 + **3/4 辅助定位焊脚（机械用，打 NC，勿接信号——若内部与触点导通，接错网会短路）**。
+要点：① CLK/MOSI 与 J1 共网（GPIO12/11），SD 独立 CS+MISO，与 BUSY（GPIO13 输入）不冲突——e-ink 等 BUSY 期间可自由读卡；② 上拉依据 = ESP-IDF SD SPI 驱动（CS 必须、MISO 建议）；③ 位号新用 R12/R13/C15/C16（画布已用到 R11/C14；R14 留 I2C SDA 上拉、R15 留 RESE、C17 缓冲、C18–C31 驱动区）；④ 2026-09-12 网表核对通过：J2 十个有网脚+三个 NC 全对，C15/C16 去耦对，R12 实际用于 MISO 上拉；**遗留：R13（GPIO8 上拉）未画，补一颗 10kΩ 接 GPIO8-3V3 即闭环**。⑤ 符号共 4 脚：1/2 信号 + **3/4 辅助定位焊脚（机械用，打 NC，勿接信号——若内部与触点导通，接错网会短路）**。
 
 - CH340N 的 TXD/RXD 接 U1 的 GPIO44/GPIO43，注意 TX/RX 交叉。
 - 两路 VBUS 都必须经过 SS34 或等效理想二极管后汇成 `5V_OR`，禁止直接短接。

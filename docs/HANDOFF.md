@@ -57,6 +57,7 @@
 
 ## Confirmed Findings
 
+- **J2 microSD 卡座核对通过（2026-09-12 18:45，sch read 活体网表）**：J2 十个有网脚全对（2=GPIO8/3=GPIO11/4=3V3/5=GPIO12/6=GND/7=GPIO21/10-13=GND），1/8/9 按设计悬空；C15/C16 去耦（3V3/GND）对；R12 实际用于 MISO（GPIO21）上拉。元件 C91145（TF-SMD_TF-01A）。**遗留：R13（10kΩ，GPIO8-3V3，SD_CS 上拉）待补画**——补上即 J2 闭环。坑：C91145 标准 symbol 的 pins 字段 number=脚号/name=脚名，与 J1 排针符号（number=信号名/name=脚号）相反，核对脚本须按符号类型取键。
 - **J1 排针核对通过（2026-09-12 18:12，easyeda sch read 活体网表）**：9 脚网络全对——1=3V3、2=GND、3=GPIO11(DIN)、4=GPIO12(CLK)、5=GPIO10(CS)、6=GPIO9(DC)、7=GPIO14(RST)、8=GPIO13(BUSY)、9=GPIO15(CS2)，与 U1 侧同名并网一致；全工程 floatingPins=0、danglingWires=0。元件用 **C2982038**（HCTL HC-2510-9A 高塑 1×9 座，封装 CONN-TH_9P-P2.54_HCTL_HC-2510-9A）。遗留警告（不阻塞）：15 条零长度导线（原 3 条+新增）、13 处导线交叉，下次清图时一并处理。
 - **P1 阶段 1 首次核对通过（2026-09-11 00:44 保存版本，经 easyeda-agent 读活体网表逐项核对）**。已放置：U1（C2913202，封装 `WIRELM-SMD_ESP32-S3-WROOM-1`）、C1 = 10 µF/25 V 0805（HGC0805R5106K250NSLJ）、C2 = 0.1 µF/50 V 0805（FCC0805B104K500DT）、C3 = 1 µF/50 V X7R 0805（CL21B105KBFNNNE）、R1 = 10 kΩ 0805（FRC0805J103TS）+ 电源/地符号，共 12 个图元。
 - **网表核对全部正确**：`3V3 = U1.2 + C1.2 + C2.2 + R1.2`；`EN = U1.3 + R1.1 + C3.2`（= 官方推荐 10 kΩ 上拉 + 1 µF 对地）；`GND = U1.1 + U1.40 + U1.41(EPAD) + C1.1 + C2.1 + C3.1`；其余 36 根 GPIO/串口网络逐一对应模组真实引脚功能，与 `docs/PIN_MAP.md` 完全一致，**0 悬空引脚**。
