@@ -57,6 +57,8 @@
 
 ## Confirmed Findings
 
+- **FPC 驱动区图形级核对通过（2026-09-12 23:20，活体网表 + 截图放大双重验证）**：① J6 26 脚逐脚核对全对（1/4/6/7/18/25/26 NC、2=GDR、3=RESE、5=VSH2、8=GND、9-14=GPIO13/GPIO14/GPIO9/GPIO10/GPIO12/GPIO11、15/16=3V3、17=GND、19-24=VPP/VDH/VGH/VDL/VGL/VCOM）；② 升压区连接全对（L1 SMMS0650-680M 68uH、Q1 2N7002、R14 470mR、C26 飞跨、D3/D4/D5 1N5819W S4）；③ 图形方向全部正确 —— D4 尖朝右接 VDH（阳极=SW）；**D3/D5 尖均朝下分别接 VGH/VGL**（布局上标签画在下方，电气为阳极=X、阴极=VGH/VGL，正确；切勿因朝下误判反向）；Q1 栅极左接 GDR、上端漏极接 SW 节点、下端源极经 R14 到 GND；④ 高压电容排 C27=VPP、C22=VGH、C19=VGL、C17=VCOM、C28=VSH2、C21=VDL、C23=VDH 下端共地；⑤ 去耦 C24/C25=1uF、C18/C20=100nF（0402），与 BOM 实测表一致。
+- **图形级核对手法沉淀**：easyeda 导出 SVG 中元件图形为引用式（polygon 数为 0，不可解析）——图形级检查（二极管/MOS 方向、NC 叉号）须用**截图 + Pillow 裁剪放大**读取；Pillow 位于托管 venv（C:/Users/Admin/.workbuddy/binaries/python/envs/default，v12.3.0）。
 - **流程强制项（2026-09-12 22:40）**：排查必须**先重读活体网表**（easyeda sch read），禁止复用缓存 JSON（22:35 曾因缓存快照漏报 D2.1 悬空）；出结论前先核对 check.summary 的 floatingPins/danglingWires。
 - **22:50 全方位复核（活体）：3 项待补已全部完成**（D2 连好、R16/R17/R18 上拉到位、J3/J4 VBUS 命名化 VBUS_COM/VBUS_USB）；交叉 14→1，floatingPins=0；剩余尾巴：16 条零长导线（未清）、1 处交叉（坐标 910,270）、polarityConventionOutliers=1（LED 极性约定）。
 - **器件必备外围件清单已建立（checklist）**：每次核对逐项打勾，防"引脚都对、器件缺件"（MAX17048 缺 I2C 上拉事件的根因对策）。
