@@ -223,6 +223,8 @@ EasyEDA 的检查器有时会报 `零长度导线（首尾坐标相同，不连�
 
 > **淘宝三款 4.2 寸实查（2026-09-12，店：鑫盛液晶）**：① id=923737932787 Hink-E042A13-A0 黑白红三色 24pin 400x300，¥23，已售500+；② id=1009961968252 FPC-194 **黑白** 24pin 400x300，¥28，已售75，主图为价签画面（疑似价签同源/散新）；③ id=1008339886174 FPC-194 黑白红三色 24pin 400x300，¥25，已售400+，**主图显示 GOODISPLAY demo 画面（GD 同源，≈GDEQ042Z21/UC8276，全刷约19s）**。三款均未标驱动 IC；24P FPC → Solomon 标准脚序概率高，插驱动板可试，固件按实测 IC 换类。结论：静态显示选 ③（GD 同源最稳）；要局刷选 ②；要快刷仍只有 GDEY042T81。
 
+> ⚠️ 下表 **J1 列为重排前旧线序**（画布当前实况）；重排目标线序见下方「J1 线序重排建议」与「SPI 硬件功能对照」——画布执行重排并网表闭环后，此表 J1 列同步更新。
+
 | 网络 | J1 脚 | J6(FPC) 脚 | DNP 驱动件 |
 | --- | --- | --- | --- |
 | 3V3 | 1 | 15 VDDIO、16 VCI | 电容 1µF+0.1µF ×2 |
@@ -233,7 +235,7 @@ EasyEDA 的检查器有时会报 `零长度导线（首尾坐标相同，不连�
 | DC GPIO9 | 6 | 11 D/C# | — |
 | RST GPIO14 | 7 | 10 RES# | — |
 | BUSY GPIO13 | 8 | 9 BUSY | — |
-| CS2 GPIO15 | 9 | — | 双 CS 屏预留 |
+| CS2 GPIO15 | 9（重排后=1） | 1（2026-09-14 改接决定，画布待执行） | 双 CS 屏预留 |
 
 > **⚠️ J1 线序重排建议（2026-09-14，实购驱动板 H1 矢量实证后提出）**：H1 针号序（1→9）＝**CS2、BUSY、CS1、DC、RST、DIN、CLK、3V3、GND**（针号从板边/底部起编）——与现 J1 线序**零针兼容**：直排线（1 对 1）时驱动板**无供电无地**（H1.8/9 的 3V3/GND 对到 J1.8/9 的 BUSY/CS2），完全不通电；若排线再反向插入（180°）则 J1.1(3V3) 撞 H1.9(GND)、J1.2(GND) 撞 H1.8(3V3)——**电源对撞烧板**。BOM 已定位"J1+此板＝准通用墨水屏接口"，而 WeAct 参考板对外是分散 2P 座+100R 串阻（COR3-COR7），无 9P 集中排针标准可循——**建议 J1 重排为 H1 序**：1=CS2(GPIO15)、2=BUSY(GPIO13)、3=CS(GPIO10)、4=DC(GPIO9)、5=RST(GPIO14)、6=DIN(GPIO11)、7=CLK(GPIO12)、8=3V3、9=GND。GPIO 分配不变（固件零改动），画布只改 J1 九线的标签归属；重排后杜邦排线 1-1 直插即用。防插反：排线 1 脚做红线标记（重排后反插=3V3 撞 GND 仍会烧）。
 | — | — | 2 GDR / 3 RESE | Q1 2N7002 + R14 0.47Ω（升压） |
@@ -241,6 +243,37 @@ EasyEDA 的检查器有时会报 `零长度导线（首尾坐标相同，不连�
 | — | — | 1/4 NC、6/7 TSCL/TSDA | NC 悬空 |
 
 要点：**默认只焊 J1（9 脚排针）**；接裸屏时补焊 J6+驱动区（DNP ×≈16）；两口 SPI 信号同名并网，**不可同时接屏**。
+
+**SPI 硬件功能对照（2026-09-14 定稿；依据 ESP32-S3 datasheet Table 2-3 IO MUX 功能表 + esp-idf `gpio_sig_map.h` 实证）。J1 与 J6 用的是同一个 SPI 外设 = SPI2（FSPI），七根信号同名并网，不存在"两个口各接不同 SPI"的问题**：
+
+| 本板网络 | GPIO | ESP32-S3 IO MUX 硬件功能 | 说明 |
+| --- | --- | --- | --- |
+| SPI_MOSI（屏 DIN / SD CMD） | GPIO11 | **FSPID** | SPI2 主出数据线，硬件直连 ✅ |
+| SPI_SCLK（屏 CLK / SD CLK） | GPIO12 | **FSPICLK** | SPI2 时钟，硬件直连 ✅ |
+| EINK_CS（屏 12 脚 CS#） | GPIO10 | **FSPICS0** | SPI2 硬件片选 0，直连 ✅ |
+| EINK_BUSY（屏 9 脚） | GPIO13 | FSPIQ（=MISO 脚） | 脚位占用——BUSY 是"屏→主控"输入，方向与 MISO 一致；固件按普通 IO 读 |
+| EINK_DC（屏 11 脚） | GPIO9 | FSPIHD | 脚位占用——DC 不是 SPI 总线信号，普通 IO 输出即可 |
+| EINK_RST（屏 10 脚） | GPIO14 | FSPIWP | 脚位占用——RST 不是 SPI 总线信号，普通 IO 输出即可 |
+| EINK_CS2（屏 1 脚，预留） | GPIO15 | （IO MUX 上无 FSPI 功能） | ESP32-S3 的 FSPICS1~5 不在 IO MUX 上，只能走 GPIO matrix 软路由（`FSPICS1_OUT_IDX`=111）——ESP-IDF spi_master 驱动任意 GPIO 均可作 CS，对墨水屏这种低速器件零影响 |
+| SD_CS（SD 卡片选） | GPIO8 | SUBSPICS1（SPI3 的） | SD 挂在 SPI2 上共享 MOSI/CLK，CS 走软路由；GPIO8 仅作普通 IO 用 |
+
+**线序正确性结论（回答"9 接口和 24 接口的 SPI 顺序对吗"）**：
+- **J6（24P 屏侧）＝GD 标准 FPC 脚序＝驱动板 P1 逐脚一致 ✅**（9=BUSY、10=RES、11=DC、12=CS、13=SCL、14=SDA、15/16=电源、17=地）。
+- **J1（9P）现画布线序 ≠ 驱动板 H1，零针兼容——必须执行下方 J1 重排**；重排后逐针对齐：
+
+| 信号 | J1 重排后脚号 | =H1 针号 | =驱动板内部所接 P1 脚 |
+| --- | --- | --- | --- |
+| CS2 (GPIO15) | 1 | 1 | P1.1 |
+| BUSY (GPIO13) | 2 | 2 | P1.9 |
+| CS (GPIO10) | 3 | 3 | P1.12 |
+| DC (GPIO9) | 4 | 4 | P1.11 |
+| RST (GPIO14) | 5 | 5 | P1.10 |
+| DIN (GPIO11) | 6 | 6 | P1.14 |
+| CLK (GPIO12) | 7 | 7 | P1.13 |
+| 3V3 | 8 | 8 | P1.15/16 |
+| GND | 9 | 9 | P1.17 |
+
+重排后杜邦排线 1-1 直插驱动板即用；驱动板把 H1 的 SPI 转到 P1（24P 裸屏座），两个口本来就是它的同一路 SPI。
 
 **J2 microSD 卡座接线表（方案 A 共享 SPI2，2026-09-12 出图；选型 C91145 = TF-01A 自弹 13 脚符号）**：
 
@@ -263,30 +296,30 @@ EasyEDA 的检查器有时会报 `零长度导线（首尾坐标相同，不连�
 
 | FPC 脚 | 名称 | 接到 | FPC 脚 | 名称 | 接到 |
 | --- | --- | --- | --- | --- | --- |
-| 1 | NC | 悬空 | 13 | SCL | GPIO12（共网） |
-| 2 | GDR | 升压区 Q1 栅极 | 14 | SDA | GPIO11（共网） |
-| 3 | RESE | R14 0.47Ω→GND | 15 | VDDIO | 3V3 + C20/C21 |
-| 4 | NC | 悬空 | 16 | VCI | 3V3 + C18/C19 → L1 |
+| 1 | NC/CS2 | **GPIO15（CS2 预留网，2026-09-14 采纳用户建议改接，画布待执行）**——标准屏 1 脚内部 NC 零影响，将来插双芯片屏免改线免打板 | 13 | SCL | GPIO12（FSPICLK 硬件时钟，共网） |
+| 2 | GDR | 升压区 Q1 栅极 | 14 | SDA | GPIO11（FSPID=MOSI 硬件直连，共网） |
+| 3 | RESE | R14 0.47Ω→GND | 15 | VDDIO | 3V3 + C18/C20 去耦（位号按画布实况 2026-09-14） |
+| 4 | NC | 悬空（GD 官方参考 4 脚亦无线；驱动板在此自加 1µF 可不跟） | 16 | VCI | 3V3（与 15 脚同网；L1 上端接此网起泵） |
 | 5 | VSH2 | C28 1µF→GND（三色） | 17 | VSS | GND |
 | 6/7 | TSCL/TSDA | 悬空 | 18 | VDD | **C51 1µF→GND（⚠️ 审计修正补挂，2026-09-14 网表实证 ✅）** |
 | 8 | BS | **GND**（选 4 线 SPI，必接） | 19 | VPP | C27 1µF→GND |
-| 9 | BUSY | GPIO13 | 20 | VDH | **仅 C23 1µF→GND（内部 generator 产生，勿接泵。位号按画布实况，规划期写 C22 系错位）** |
-| 10 | RES# | GPIO14 | 21 | VGH | C22 + D4 阴极（SW→VGH 整流。位号按画布实况） |
-| 11 | D/C# | GPIO9 | 22 | VDL | C21（位号按画布实况） |
-| 12 | CS# | GPIO10 | 23 | VGL | C19 + D5 阴极（位号按画布实况） |
+| 9 | BUSY | GPIO13（FSPIQ=MISO 脚占用，作输入） | 20 | VDH | **仅 C23 1µF→GND（内部 generator 产生，勿接泵。位号按画布实况，规划期写 C22 系错位）** |
+| 10 | RES# | GPIO14（FSPIWP 脚占用，普通 IO 输出） | 21 | VGH | C22 + D4 阴极（SW→VGH 整流。位号按画布实况） |
+| 11 | D/C# | GPIO9（FSPIHD 脚占用，普通 IO 输出） | 22 | VDL | C21（位号按画布实况） |
+| 12 | CS# | GPIO10（FSPICS0 硬件片选 0 直连） | 23 | VGL | C19 + D5 阴极（位号按画布实况） |
 | — | — | — | 24 | VCOM | C17（位号按画布实况） |
 
-**驱动板 v1.4 的 P1.1/P1.4 差异说明（2026-09-14 用户截图问询，矢量实证）**：① P1.1 接 EPD_CS2——双芯片屏兼容设计（Solomon 标准 1 脚=NC，部分双芯片屏 1 脚=CS2；插标准屏零影响，插双芯片屏 CS2 自动生效，配 H2 跳线可短接 CS1/CS2 省 IO）。本方 J6.1 保持 NC 正确；将来遇 1 脚=CS2 的屏再把 J6.1 接 GPIO15 预留网即可。② P1.4 对地 1µF——NC 脚挂电容（保持直流开路，滤杂波/ESD，GD 参考同款），无害；本方 J6.4 悬空即可不必跟。③ P1 信号脚 2-24 与本方 J6 完全一致 ✅。
+**驱动板 v1.4 的 P1.1/P1.4 差异说明（2026-09-14 用户截图问询，矢量实证）**：① P1.1 接 EPD_CS2——双芯片屏兼容设计（Solomon 标准 1 脚=NC，部分双芯片屏 1 脚=CS2；插标准屏零影响，插双芯片屏 CS2 自动生效，配 H2 跳线可短接 CS1/CS2 省 IO）。**✅ 本方已采纳同款设计（2026-09-14，用户理由"将来可能有 CS2 屏，不想重新连线打板"成立）：J6.1 由 NC 改接 GPIO15（CS2 预留网），画布操作单见上方 J6 表——标准屏 1 脚内部不接，此改动零影响、零成本。**② P1.4 对地 1µF——**GD 官方参考电路并没画**（gd_ref_p1b.png 渲染实证：官方 P1 的 1/4/6/7 四脚均无线=NC；挂电容的是 5(C2)/18(C7)/20(C9)/22(C10)/23(C11)/24(C12) 六脚）。驱动板此件系自加（NC 脚挂 1µF 保持直流开路、滤杂波/ESD），无害但非官方画法；本方 J6.4 维持悬空即可。③ P1 信号脚 2-24 与本方 J6 完全一致 ✅。
 
 泵拓扑（✅ 2026-09-14 网表闭环实证通过；位号**按画布实况**——规划期文档 D1/D2/D3+C29 与画布实际 D3/D4/D5+C26 系统性错位，已全面纠正，以下均为画布真实位号）：VCI(=3V3)→L1(68µH)→SW；Q1 2N7002 D=SW/G=GDR/S=RESE 脚；RESE 脚→R14(0.47Ω)→GND；**D4: SW→VGH（PREVGH，正栅压整流）**；**C26: SW↔X 飞跨（1µF/C91186），D5: X(MID)→VGL（负压级）**；**D3: X(MID)→GND（飞跨节点正摆钳位）**。**VSH1/VSH2/VSL/VCOM/VDD 均由内部 generator 产生**，外部各挂 1µF/25V 对地（VDH=C23、VSH2=C28、VDL=C21、VCOM=C17、VPP=C27、VDD=C51），**严禁把泵整流输出怼到 VSH1 上（与内部泵打架）——画布现状正确**。网表实证（02:30）：SW 网=Q1.3+D4.2+C26.2+L1.2 四点完整；X 网=C26.1+D3.2+D5.2 三点完整；三管方向全对。GD 参考参数差异备案：L1 4.7µH 500mA、RESE 2.2Ω∥1M、飞跨 4.7µF、Q1 SI1308EDL——维持本方值（68µH/0.47Ω/1µF 飞跨/2N7002，双实物背书；飞跨 1µF 介于驱动板 100nF 与 GD 4.7µF 之间，可行）。要点：① BS 必须接 GND；② 二极管用肖特基（画布 D3/D4/D5=SOD-123 肖特基 C42441798 ✅）；③ 焊接顺序：先 FPC 座+去耦，试屏再补泵区。
 
 **J6 驱动区元件级接线表（v1.3 画图操作单，逐脚一列）**
 
-J6（26 脚符号）：1=NC｜2=GDR｜3=RESE｜4=NC｜5=VSH2｜6=TSCL(空)｜7=TSDA(空)｜**8=BS→GND（必接）**｜9=BUSY→GPIO13｜10=RES#→GPIO14｜11=D/C#→GPIO9｜12=CS#→GPIO10｜13=SCL→GPIO12｜14=SDA→GPIO11｜15=VDDIO→3V3｜16=VCI→3V3｜17=VSS→GND｜**18=VDD→1µF→GND（⚠️ 2026-09-14 手册审计修正，原 NC 为抄漏）**｜19=VPP→VPP｜20=VDH→VDH｜21=VGH→VGH｜22=VDL→VDL｜23=VGL→VGL｜24=VCOM→VCOM｜25/26=定位脚→NC（勿接信号；可选改进：改接 GND——WeAct 参考板即接地，利 EMC 与机械强度）
+J6（26 脚符号）：1=NC/**CS2→GPIO15（2026-09-14 改接决定，画布待执行：删 1 脚 NC 叉号→引短线→挂 GPIO15 网络标签，与 U1.16 侧 CS2 旗标同网名并网）**｜2=GDR｜3=RESE｜4=NC｜5=VSH2｜6=TSCL(空)｜7=TSDA(空)｜**8=BS→GND（必接）**｜9=BUSY→GPIO13｜10=RES#→GPIO14｜11=D/C#→GPIO9｜12=CS#→GPIO10｜13=SCL→GPIO12｜14=SDA→GPIO11｜15=VDDIO→3V3｜16=VCI→3V3｜17=VSS→GND｜**18=VDD→1µF→GND（⚠️ 2026-09-14 手册审计修正，原 NC 为抄漏）**｜19=VPP→VPP｜20=VDH→VDH｜21=VGH→VGH｜22=VDL→VDL｜23=VGL→VGL｜24=VCOM→VCOM｜25/26=定位脚→NC（勿接信号；可选改进：改接 GND——WeAct 参考板即接地，利 EMC 与机械强度）
 
 **J6 手册对照记录（2026-09-14，四重依据：① GDEY0213B74 官方手册 p8「5. Input/output Pin Assignment」＝本规划脚序出处；② YMS122250 同规格 24P 手册页（29.2×59.2×0.9mm/122×250/三色，其 18=VDDD「1.8V voltage input & output」）；③ SSD1680 原厂手册 Table 5-2（VDD＝"a capacitor should be connected between VDD and VSS under all circumstances"）；④ WeAct 参考板原理图 weact_sch.pdf（符号倒排 PIN n=屏脚 25−n，屏 18 脚实挂 C11 1µF 0402 到地））**：
-- 悬空脚判定：1/4＝NC（Keep Open）✅；6/7＝TSCL/TSDA（SSD1680 原厂 when not in use＝Open，YMS/GD 手册均未要求接地，维持悬空）✅；25/26＝连接器定位机械脚（NC 可接受，接 GND 更优）。
-- **❌→✅ 唯一缺陷已修复：18 脚＝VDD（SSD1680 核心 1.8V 电源，由 VCI 内部稳压产出），原规划写 NC 系抄漏——手册要求 VDD-VSS 间必须接电容，WeAct 参考板亦实挂 1µF。**已修复并网表实证（2026-09-14 02:30）：画布补挂 **C51**（1µF/C91186/0805，位号 EDA 自动分配），网=C51.1+J6.18，C51.2→GND ✅；J6 悬空脚=[1,25,26,4,6,7]（18 已退出悬空名单，其余 6 脚均为有意悬空）。**
+- 悬空脚判定：4＝NC（Keep Open）✅（**1 脚已于 2026-09-14 决定改接 GPIO15/CS2 预留网，退出悬空名单**）；6/7＝TSCL/TSDA（SSD1680 原厂 when not in use＝Open，YMS/GD 手册均未要求接地，维持悬空）✅；25/26＝连接器定位机械脚（NC 可接受，接 GND 更优——两块参考实物均接地，建议采纳）。
+- **❌→✅ 唯一缺陷已修复：18 脚＝VDD（SSD1680 核心 1.8V 电源，由 VCI 内部稳压产出），原规划写 NC 系抄漏——手册要求 VDD-VSS 间必须接电容，WeAct 参考板亦实挂 1µF。**已修复并网表实证（2026-09-14 02:30）：画布补挂 **C51**（1µF/C91186/0805，位号 EDA 自动分配），网=C51.1+J6.18，C51.2→GND ✅；**J6 悬空脚=[4,6,7,25,26]**（18 补 C51 已退出；1 改接 GPIO15 待画布执行后退出；其余 5 脚均为有意悬空）。**
 - 命名差异说明（功能一致，非错误）：20 手册 VSH1＝本表 VDH、22 手册 VSL＝本表 VDL（YMS 手册即命名 VDH/VDL）；16 手册 VCI＝YMS 命名 VDD；5 手册 VSH2＝YMS 命名 VDHR（三色红源电压）。
 - 19 VPP（FOR TEST）：挂 C27 1µF 无害可保留（WeAct 悬空，两种做法皆可，本项目不烧 OTP 无影响）。
 
@@ -350,14 +383,14 @@ C22：VGH→GND｜C23：VDH→GND｜C21：VDL→GND｜C19：VGL→GND｜C17：VC
 | GPIO5 | `ENC_B` | 编码器 B |
 | GPIO6 | `ENC_SW` | 编码器按压 |
 | GPIO7 | `BTN1` | 用户按键 1 |
-| GPIO8 | `SD_CS` | SD 卡片选 |
-| GPIO9 | `EINK_DC` | 墨水屏 D/C |
-| GPIO10 | `EINK_CS` | 墨水屏 CS |
-| GPIO11 | `SPI_MOSI` | 墨水屏 DIN / SD MOSI |
-| GPIO12 | `SPI_SCLK` | 墨水屏 CLK / SD CLK |
-| GPIO13 | `EINK_BUSY` | 墨水屏 BUSY |
-| GPIO14 | `EINK_RST` | 墨水屏复位 |
-| GPIO15 | `EINK_CS2` | 双 CS 屏预留 |
+| GPIO8 | `SD_CS` | SD 卡片选（IO MUX：SUBSPICS1——SD 挂 SPI2，CS 走软路由） |
+| GPIO9 | `EINK_DC` | 墨水屏 D/C（IO MUX：FSPIHD 脚位占用，普通 IO） |
+| GPIO10 | `EINK_CS` | 墨水屏 CS（IO MUX：**FSPICS0** 硬件片选 0） |
+| GPIO11 | `SPI_MOSI` | 墨水屏 DIN / SD MOSI（IO MUX：**FSPID** 硬件直连） |
+| GPIO12 | `SPI_SCLK` | 墨水屏 CLK / SD CLK（IO MUX：**FSPICLK** 硬件直连） |
+| GPIO13 | `EINK_BUSY` | 墨水屏 BUSY（IO MUX：FSPIQ/MISO 脚位占用，作输入） |
+| GPIO14 | `EINK_RST` | 墨水屏复位（IO MUX：FSPIWP 脚位占用，普通 IO 输出） |
+| GPIO15 | `EINK_CS2` | 双 CS 屏预留（IO MUX 无 FSPI 功能，CS 走 GPIO matrix 软路由） |
 | GPIO16 | `BTN2` | 用户按键 2 |
 | GPIO17 | `CHRG_DET` | 充电检测 / 深睡唤醒 |
 | GPIO19 | `USB_DM` | 原生 USB D- |
