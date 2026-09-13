@@ -501,9 +501,9 @@ C22：VGH→GND｜C23：VDH→GND｜C21：VDL→GND｜C19：VGL→GND｜C17：VC
 | 9 | NC1 | ← `MIXS`（PCM 混音节点） |
 | 10 | COM1 | → `AMP_INP` → U16.3 |
 | 4 | NO2 | ← `MIXN`（BT 差分 N 混音节点） |
-| 7 | NC2 | → C38(1µF) → GND（PCM 模式下 INN 交流参考地） |
+| 7 | NC2 | → C44(1µF) → GND（PCM 模式下 INN 交流参考地） |
 | 6 | COM2 | → `AMP_INN` → U16.4 |
-| 8 | V+ | ← **VBAT** + C39(0.1µF) 就近去耦 |
+| 8 | V+ | ← **VBAT** + C45(0.1µF) 就近去耦（与 U16 VDD 共轨共享） |
 | 3 | GND | → GND |
 
 **U16 NS4150C（SOP-8，官方脚序：1 CTRL / 2 Bypass / 3 INP / 4 INN / 5 VoN / 6 VDD / 7 GND / 8 VoP）**：
@@ -511,12 +511,12 @@ C22：VGH→GND｜C23：VDH→GND｜C21：VDL→GND｜C19：VGL→GND｜C17：VC
 | 脚 | 名称 | 接法 |
 | --- | --- | --- |
 | 1 | CTRL | ← `AMP_EN`（= **GPIO41** + R26 10k 下拉→GND，**开机默认关断**消 pop；高=工作） |
-| 2 | Bypass | → C40(1µF) → GND（内部共模旁路，手册要求） |
+| 2 | Bypass | → C46(1µF) → GND（内部共模旁路，手册要求） |
 | 3 | INP | ← `AMP_INP` |
 | 4 | INN | ← `AMP_INN` |
 | 5 | VoN | → `SPK_N` → J7.2 |
 | 8 | VoP | → `SPK_P` → J7.1（无滤波器架构，VoP/VoN **直连喇叭，不加 LC**） |
-| 6 | VDD | ← **VBAT** + C41(10µF)/C42(0.1µF) 就近去耦 |
+| 6 | VDD | ← **VBAT** + C47(10µF 主)/C48(0.1µF 高频) 就近去耦 |
 | 7 | GND | → GND |
 
 **U14 PCM5102A（TSSOP-20，TI 官方脚序）**：
@@ -524,12 +524,12 @@ C22：VGH→GND｜C23：VDH→GND｜C21：VDL→GND｜C19：VGL→GND｜C17：VC
 | 脚 | 名称 | 接法 |
 | --- | --- | --- |
 | 1 | CPVDD | ← 3V3 + C43(1µF→GND) |
-| 2 / 4 | CAPP/CAPM | ↔ C44(1µF) 飞跨电容 |
+| 2 / 4 | CAPP/CAPM | ↔ C37(1µF) 飞跨电容（✅ 2026-09-14 审计实测 C37=$1N417/$1N416 双脚对位） |
 | 3 | CPGND | → GND |
-| 5 | VNEG | → C45(1µF→GND) |
-| 6 | OUTL | → C36(1µF) → `MIXSL` |
-| 7 | OUTR | → C37(1µF) → `MIXSR` |
-| 8 | AVDD | ← 3V3 + C47(10µF)+C48(0.1µF) |
+| 5 | VNEG | → C39(1µF→GND) |
+| 6 | OUTL | → C43(1µF) → `MIXSL` |
+| 7 | OUTR | → C42(1µF) → `MIXSR` |
+| 8 | AVDD | ← 3V3 + C49(10µF 主)+C36(0.1µF 高频)（✅ 2026-09-14 审计实测两颗均挂 3V3/GND 在位；另有 C30 10µF 第二颗 bulk 紧邻） |
 | 9 | AGND | → GND |
 | 10 | DEMP | → GND（去加重关） |
 | 11 | FLT | → GND（正常延迟滤波） |
@@ -537,9 +537,9 @@ C22：VGH→GND｜C23：VDH→GND｜C21：VDL→GND｜C19：VGL→GND｜C17：VC
 | 13 / 14 / 15 | BCK/DIN/LRCK | ← **GPIO47 / GPIO38 / GPIO48** |
 | 16 | FMT | → GND（I2S 格式） |
 | 17 | XSMT | ← 3V3（常开；无时钟时芯片自动静音，pop 由 AMP_EN 时序管理） |
-| 18 | LDOO | → C46(1µF→GND) |
+| 18 | LDOO | → C40(1µF→GND) |
 | 19 | DGND | → GND |
-| 20 | DVDD | ← 3V3 + C49(1µF) |
+| 20 | DVDD | ← 3V3 + C38(1µF→GND)——🔴 **2026-09-14 05:25 活体网表审计抓出画布缺陷：U14.20 现仅挂 C38→GND（$1N424 两点网），3V3 电源线漏接！** TI SLAS859C 明确 DVDD=数字电源**输入**脚（1.8V 或 3.3V，片上 LDO 的输入），悬空=数字核零供电、DAC 上电必不工作（⚠️ 勿与"内部 LDO"混淆——LDOO(18) 才是 LDO 输出脚，只挂电容；DVDD 必须外部供电）。**修复操作单：U14.20 拉线/挂 3V3 旗标（C38 保留作去耦），改后网表复核 $1N424 并入 3V3 或换网 U14.20=3V3 即闭环** |
 
 **混音网络**：`MIXLP`—R19(10k)—→`MIXP`、`MIXRP`—R20(10k)—→`MIXP`；`MIXLN`—R21(10k)—→`MIXN`、`MIXRN`—R22(10k)—→`MIXN`；`MIXSL`—R23(10k)—→`MIXS`、`MIXSR`—R24(10k)—→`MIXS`。
 
@@ -557,9 +557,15 @@ C22：VGH→GND｜C23：VDH→GND｜C21：VDL→GND｜C19：VGL→GND｜C17：VC
 - **U14 PCM5102A（20 脚）、U15 TS5A23157（10 脚）、U16 NS4150C（8 脚）、J7、R19-R26、C36-C48 逐脚/逐件与设计拓扑完全一致**。位号被用户按摆放顺序重排（惯例），完整映射表见 BOM「音频链新增元件」：C37=飞跨、C38=DVDD、C39=VNEG、C40=LDOO、C41=CPVDD、C42=OUTR 耦合、C43=OUTL 耦合、C44=NC2 参考、C45=VBAT 高频、C46=Bypass、C47=VDD 主 10µF、C48=VDD 高频、C36=AVDD 高频。
 - **全图孤立命名网络 = GPIO3/4/5/6/45/46（阶段 4 预留）——阶段 3 网络全部闭合**：4 个 MIX* 旗标已被 R19-R24 闭合、GPIO38/39/41/47/48 已接 U14/U15/U16。
 - 悬空脚 38 = 设计性 NC 全集（此前 36 + J7.3/4），无一意外。
-- **唯一缺件：AVDD 主去耦 10µF 未放**（3V3 轨只有 C36 0.1µF + C41 1µF；AVDD 仅 0.1µF 工作，按设计补 10µF 更稳）——**建议位号 C49（正好空缺）**，挂 3V3 靠 U14.8，料号 C33546007 同款。
+- ~~**唯一缺件：AVDD 主去耦 10µF 未放**~~ → **✅ 已补齐**（位号 C49，2026-09-13 04:20 放置核对通过：脚1→3V3、脚2→GND；另有 C30 10µF 第二颗 bulk 紧邻 AVDD 区，2026-09-14 审计实测均在网）。
 - 遗留非阻塞：老交叉 1 处（910,270）、零长导线（结构性忽略）、C27 极性提示（MLCC 忽略）。
 - **教训**：① 核对脚本按料号定位器件时，同料号器件会撞车（J5/J7 都是 C52037422，脚本把 J7 查成了 J5，虚报 2 项失败）——**按位号定位**；② 用户按摆放顺序重排位号是稳定惯例，核对以拓扑为准、位号映射回填文档。
+
+**2026-09-14 05:25 音频段活体网表复审（快照 242 器件/103 网络，Q1 换型等一轮改动后全链重验）**：
+- **🔴 唯一真缺陷：U14.20 DVDD 漏接 3V3**（详见上方 U14 表 20 脚行操作单）——TI SLAS859C 实锤 DVDD=数字电源输入脚，画布现仅挂 C38→GND，上电 DAC 必不工作。其余全部通过。
+- **✅ 通过项**：U14 其余 19 脚（CPVDD/AVDD=3V3、飞跨 C37、I2S=GPIO47/38/48、SCK/FMT/FLT/DEMP 接地模式、XSMT=3V3）；U15 10 脚全对——**NC1(9)=MIXS、NC2(7)→C44→GND 均作信号脚在网，没有踩"把 NC 当未连接"的坑**（TS5A23157 的 NC=Normally Closed）；U16 8 脚全对（CTRL=GPIO41+R26 下拉、Bypass→C46、VDD=VBAT+C47/C48）；U4(MOD1) 音频四路差分 1/2/4/5→C32-C35 耦合→MIXLP/LN/RN/RP、17=3V3、19=GPIO40、21=GPIO42、22=BT_TXD、12 脚设计性悬空与手册对照清单一致；J7（1=$1N470=VoP 网、2=$1N469=VoN 网、3/4 定位脚 NC）；J8（1=BT_TXD degree2 闭合、2=GND、料号 C2982031 高塑在位）；SW1 EC11 7 脚全对（A=GPIO4/B=GPIO5/C=GND/D=GPIO6/E=GND/6,7=GND）；U3=TP4056（C382139，ESOP-8-EP）九脚全合理：1 TEMP→GND（禁温测官方做法）、2 PROG→R4、4 VCC=5V_OR、5 BAT=VBAT、6 STDBY→R2、7 CHRG=GPIO17（开漏，S3 内部上拉承担）、8 CE=5V_OR 常开、9 EP→GND 散热正确。
+- **📝 文档缺陷一并修正（本段）**：三张 IC 表位号从重排前旧映射更新为 BOM 现行映射（U14: 飞跨 C37/VNEG C39/OUTL C43/OUTR C42/AVDD C49+C36/LDOO C40/DVDD C38；U15: NC2 C44/V+ C45；U16: Bypass C46/VDD C47+C48）；"AVDD 主去耦 10µF 未放"过时（C49 已于 2026-09-13 04:20 放置核对通过）。
+- **📝 BOM 待补行**：C30（10µF AVDD 第二颗 bulk）、C31（0.1µF MOD1 去耦）、C32-C35（MOD1 四路差分耦合 1µF×4）——画布全在、网络全对，仅 BOM 缺行。
 
 **固件/调试注意事项**：
 1. **音源切换消 pop 序列**：切 GPIO39 前先拉低 GPIO41（功放关断）→ 切换 → 再拉高使能。
