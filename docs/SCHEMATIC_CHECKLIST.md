@@ -565,7 +565,13 @@ C22：VGH→GND｜C23：VDH→GND｜C21：VDL→GND｜C19：VGL→GND｜C17：VC
 - **🔴 唯一真缺陷：U14.20 DVDD 漏接 3V3**（详见上方 U14 表 20 脚行操作单）——TI SLAS859C 实锤 DVDD=数字电源输入脚，画布现仅挂 C38→GND，上电 DAC 必不工作。其余全部通过。
 - **✅ 通过项**：U14 其余 19 脚（CPVDD/AVDD=3V3、飞跨 C37、I2S=GPIO47/38/48、SCK/FMT/FLT/DEMP 接地模式、XSMT=3V3）；U15 10 脚全对——**NC1(9)=MIXS、NC2(7)→C44→GND 均作信号脚在网，没有踩"把 NC 当未连接"的坑**（TS5A23157 的 NC=Normally Closed）；U16 8 脚全对（CTRL=GPIO41+R26 下拉、Bypass→C46、VDD=VBAT+C47/C48）；U4(MOD1) 音频四路差分 1/2/4/5→C32-C35 耦合→MIXLP/LN/RN/RP、17=3V3、19=GPIO40、21=GPIO42、22=BT_TXD、12 脚设计性悬空与手册对照清单一致；J7（1=$1N470=VoP 网、2=$1N469=VoN 网、3/4 定位脚 NC）；J8（1=BT_TXD degree2 闭合、2=GND、料号 C2982031 高塑在位）；SW1 EC11 7 脚全对（A=GPIO4/B=GPIO5/C=GND/D=GPIO6/E=GND/6,7=GND）；U3=TP4056（C382139，ESOP-8-EP）九脚全合理：1 TEMP→GND（禁温测官方做法）、2 PROG→R4、4 VCC=5V_OR、5 BAT=VBAT、6 STDBY→R2、7 CHRG=GPIO17（开漏，S3 内部上拉承担）、8 CE=5V_OR 常开、9 EP→GND 散热正确。
 - **📝 文档缺陷一并修正（本段）**：三张 IC 表位号从重排前旧映射更新为 BOM 现行映射（U14: 飞跨 C37/VNEG C39/OUTL C43/OUTR C42/AVDD C49+C36/LDOO C40/DVDD C38；U15: NC2 C44/V+ C45；U16: Bypass C46/VDD C47+C48）；"AVDD 主去耦 10µF 未放"过时（C49 已于 2026-09-13 04:20 放置核对通过）。
-- **📝 BOM 待补行**：C30（10µF AVDD 第二颗 bulk）、C31（0.1µF MOD1 去耦）、C32-C35（MOD1 四路差分耦合 1µF×4）——画布全在、网络全对，仅 BOM 缺行。
+- **📝 BOM 待补行**：C30（10µF AVDD 第二颗 bulk）、C31（0.1µF MOD1 去耦）、C32-C35（MOD1 四路差分耦合 1µF×4）——画布全在、网络全对，仅 BOM 缺行。（✅ 上述 6 行已于同日补录进 BOM 音频链元件表）
+
+**🔒 全图 IC 电源/GND 规则级扫描（2026-09-14 05:43，快照 243/102，DVDD 缺陷后的方法升级：连通性弱校验 ≠ 设计规则校验）**：
+- **起因**：DVDD 型缺陷（电源脚只挂电容不接轨）能骗过"每脚有网、每件在网"的连通性校验——接了电容=有连接。升级规则：**每颗 IC 的电源类脚（VDD/VCC/AVDD/DVDD/VBAT/VIN/VOUT/V+ 等）必须逐脚对表到正确电源轨，GND 类脚必须逐脚=GND**。
+- **结果：13 颗 IC 全绿，零 DVDD 型残留**——U1 ESP32、U2 TPS63021(VIN×3=VBAT/VOUT×2=3V3)、U3 TP4056(VCC=5V_OR)、U4 MOD1(VBAT=3V3)、U9 MAX17048(VDD=VBAT)、U10 CH340(VCC=3V3)、U11/U12 USBLC6(VBUS=3V3，BOM 116 行备案的沁恒 ESD 正压设计)、U13 SHT30(VDD=3V3)、U14 PCM5102A(三电源脚=3V3)、U15 TS5A23157(V+=VBAT)、U16 NS4150C(VDD=VBAT)；全部 GND/EP=GND。
+- **电池保护链逐环实证**：J5.1→$1N513(与 Q2.3/R28.1)→**Q2 AO3401A 防反接**(栅极 R27→BAT_N)→VBAT 主轨(19 成员：U2/U3/U9/U15/U16/R10 + 去耦组)；**U6 DW01A**：VCC 经 R10 接 VBAT+C13 滤波到自身地(BAT_N)、VM 经 R11 感测、OD/OC 分别驱动 U7 双栅($1N246/$1N511)、TD 悬空(手册允许)；**U7 FS8205A**：S1=BAT_N、S2=GND 背靠背低侧保护、D1/D2 内部共漏悬空(正常)。
+- **此扫描为原理图收官标准**：后续任何画布改动（换料/补线/改线）后，重跑本扫描 + 区域逐脚对表双闸门，再谈 PCB。
 
 **固件/调试注意事项**：
 1. **音源切换消 pop 序列**：切 GPIO39 前先拉低 GPIO41（功放关断）→ 切换 → 再拉高使能。
