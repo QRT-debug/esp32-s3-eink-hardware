@@ -599,6 +599,15 @@ C22：VGH→GND｜C23：VDH→GND｜C21：VDL→GND｜C19：VGL→GND｜C17：VC
 - **电源轨去耦伴生核查**：VBAT 轨 8 颗去耦（C4/C5/C6/C11/C14/C45/C47/C48）覆盖 6 个用电单元；3V3 轨 22 颗覆盖 U1/U4/U10/U11/U12/U13/U14×4/U2 输出+全部接口与上拉——手册"每电源脚 0.1µF 级旁路"要求全满足 ✅
 - **44 条几何 warn 定案全部无害**：4 条"极性脚约定"＝C27/C38/C41/C49 全是 **C0805 陶瓷（无极性器件，画法镜像不一致无电气意义）**；40 条零长度导线＝既有备案遗留（不进网表，可删）。
 - **结论：全图 14 IC 每脚手册级零缺陷；至此"逐脚网表 + 电源规则扫描 + 极性 8x 渲染 + 意图对表 + 手册级逐脚"五道闸门全绿，原理图收官判定维持——可进 PCB。**
+- 🔎 **06:36 独立手册复验（用户质询："核查不能只参照定稿档案——档案若一开始就错，对表只会固化错误"——质询成立）**：06:14 节的参照源实况＝仅 U9 CTG 一项是本轮新开手册原文，其余靠"datasheet 印象 + 档案对表"混合，存在档案错误自洽风险。本轮对参照源最弱的关键项全部升级为 **A 级（不碰档案、不凭印象、直接原厂手册原文实锤）**：
+  - **U11/U12 USBLC6 VBUS→3V3**：ST DS4260 应用示例原文"connections from the **pin VBUS to VCC**"——VBUS 脚本接被保护系统电源轨；本项目被保护侧为 3.3V 逻辑（CH340N/ESP32），接 3V3 使上钳位对齐逻辑电平，与 BOM 122 行沁恒备案不矛盾 ✅
+  - **U10 CH340N V3**：多源一致"当使用 5V 供电时 V3 需外接 0.1µF 退耦；**3.3V 系统下 V3 应直接连接 VCC**" ✅
+  - **U2 TPS63021**：TI SLVS916I 脚表原文——EN "**must not be left open**"（画布=VBAT ✅）；FB "**must be connected to VOUT on fixed output voltage versions**"（TPS63021 固定 3.3V 版，画布 FB=3V3 ✅）；PS/SYNC "**must not be left open**"，=GND 即 power save **enabled**（省电使能，电池设备意图 ✅）；PG "**can be left open**"（悬空 ✅）；PowerPAD 必接 PGND（EP=GND ✅）
+  - **U13 SHT30**：Sensirion SHT3x-DIS v5 脚表原文——pin7 R "**No electrical function; to be connected to VSS**"（画布=GND ✅）；ALERT "**must be left floating if unused**"（悬空 ✅）；nRESET "recommended to be left floating"（悬空 ✅）；ADDR "**do not leave floating**"（画布=GND=0x44，悬空才是违规 ✅）
+  - **U1 WROOM-1-N16R8**：乐鑫模组规格书原文——"在集成 Octal SPI PSRAM（ESP32-S3R8）的模组中，**管脚 IO35、IO36、IO37 已连接至模组内部 Octal SPI PSRAM，不可用于其他功能**"（画布悬空为唯一正确接法 ✅）；"GPIO0/45/46 复位时连接内部弱上拉/下拉，**无外部连接时由内部电阻决定默认值**"（45/46 悬空默认值正合 3.3V flash/正常启动 ✅）
+  - **U4 MOD1 EWM104-BT60SP3**：亿佰特官网手册 24 脚逐脚对表全吻合（MICBAIS/MIC"不使用时请悬空"、K1-3 低有效按键、VUSB=充电输入、LED_A=音频连接状态高有效输出、ANT 邮票孔=板载天线时默认不动）✅；**唯一档案偏差：13 MUTE 手册定义是"功放静音控制输出脚（模块输出低电平）"而非输入**——BOM 13 行描述已修正；接法（悬空预留）本就无风险 ✅
+  - 维持既有 A 级依据（前轮原文）：U9 CTG/QSTRT（ADI 中文手册"连接至地"/"不使用接 GND"）、U6/U7 DW01A TD 悬空（05:43）、U14 PCM5102A DVDD（05:25 TI SLAS859C）。C 级（行业常识级公式/极低风险）仅剩：TP4056 PROG=1200mV/R、TS5A23157 IN 逻辑、NS4150C CTRL——均属千锤百炼的标准接法。
+  - **参照源分级制度（沉淀）**：A=本轮/前轮原厂手册原文实锤；B=原厂应用笔记/参考设计；C=教科书级常识。原则：**审查结论只能引用 A/B 级；C 级结论必须在文档中显式标注等级，不得冒充已实证**。
 
 **固件/调试注意事项**：
 1. **音源切换消 pop 序列**：切 GPIO39 前先拉低 GPIO41（功放关断）→ 切换 → 再拉高使能。
