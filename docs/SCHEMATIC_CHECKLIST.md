@@ -266,7 +266,7 @@ EasyEDA 的检查器有时会报 `零长度导线（首尾坐标相同，不连�
 | 3 | RESE | R14 0.47Ω→GND | 15 | VDDIO | 3V3 + C20/C21 |
 | 4 | NC | 悬空 | 16 | VCI | 3V3 + C18/C19 → L1 |
 | 5 | VSH2 | C28 1µF→GND（三色） | 17 | VSS | GND |
-| 6/7 | TSCL/TSDA | 悬空 | 18 | NC | 悬空 |
+| 6/7 | TSCL/TSDA | 悬空 | 18 | VDD | **1µF→GND（⚠️ 审计修正，原 NC 系抄漏）** |
 | 8 | BS | **GND**（选 4 线 SPI，必接） | 19 | VPP | C27 1µF→GND |
 | 9 | BUSY | GPIO13 | 20 | VDH | **仅 C22 1µF→GND（⚠️ 2026-09-14 审计：VSH1 由内部 generator 产生，勿接泵——原"D3 阴极"系误记）** |
 | 10 | RES# | GPIO14 | 21 | VGH | C23 + D3 阴极（SW→VGH 整流） |
