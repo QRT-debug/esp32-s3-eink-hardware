@@ -232,8 +232,8 @@
 | R3 | 红灯 ↔ GPIO17(CHRG#) | 红灯限流 | 1 kΩ |
 | R4 | PROG ↔ GND | TP4056 充电电流设定 | 1.2 kΩ |
 | R5 | 3V3 ↔ GPIO0 | BOOT 上拉 | 10 kΩ |
-| R6 | J3.CC2 ↔ GND | J3 CC2 下拉（设备标识） | 5.1 kΩ |
-| R7 | J3.CC1 ↔ GND | J3 CC1 下拉（设备标识） | 5.1 kΩ |
+| R6 | J3.CC1 ↔ GND | J3 CC1 下拉（设备标识；**2026-09-14 网表实证 R6=$1N389=J3.A5(CC1)，235 行旧表 CC1/CC2 写反已修正**） | 5.1 kΩ |
+| R7 | J3.CC2 ↔ GND | J3 CC2 下拉（设备标识） | 5.1 kΩ |
 | R8 | J4.CC1 ↔ GND | J4 CC1 下拉 | 5.1 kΩ |
 | R9 | J4.CC2 ↔ GND | J4 CC2 下拉 | 5.1 kΩ |
 | R10 | DW01A VCC ↔ VBAT | 保护 IC 供电限流 | 100 Ω |

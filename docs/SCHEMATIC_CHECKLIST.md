@@ -621,6 +621,13 @@ C22：VGH→GND｜C23：VDH→GND｜C21：VDL→GND｜C19：VGL→GND｜C17：VC
 - **J5 电池座**：1=$1N513（经 Q2）、2=BAT_N，3/4 悬空（4P 座仅用 2P，防呆冗余）✅；J7 喇叭、J8 调试口（BT_TXD+GND）✅。
 - **结论：供电之外的信号链（SPI/I2S/UART/I2C/USB/按键/编码器/屏双路）全量对表通过；功能级收官。**
 
+**🔎 功能级独立手册复验（2026-09-14 06:53，用户质询"06:44 对照的参照系还是定稿档案"——成立，升级 A 级）**：
+- **阻值画布属性直读（不经档案）**：R6/R7/R8/R9=**FRC0805F5101TS（5101=5.1kΩ±1%）**、R4=FRC0805F1201TS（1.2k±1%）、R1/R5/R12/R13/R15=FRC0805J103TS（10k±5%）、R16/R17=FRC0805J472TS（4.7k±5%）、R18=RT0805BRD07100KL（**100k**——ALRT 开漏上拉偏弱但低速告警信号完全可用，IOL 余量巨大，记录备查）——全部与设计意图一致 ✅
+- **USB-IF Type-C 规范（ST 官方技术文章 Table 3）**："a sink must assert **Rd pull-down resistors on both CC pins**"、Rd=**5.1kΩ**、CC1/CC2 **各自独立不可短接共用**——画布 J3/J4 各两颗独立 5.1k 完全合规 ✅（附注：5.1k Rd 声明 default USB 电流，接电脑 C 口充电时 TP4056 1A 略超默认 500mA——实际 C 口充电头普遍 1.5A+，DIY 常规权衡，非缺陷）
+- **SSD1680 六线接口（Solomon Table 5-2/6-2 原文）**：4-wire SPI=SCL+SDA+D/C#+CS#（+RES#+BUSY），BUSY 高=忙、CS#/D/C# 不用时接 VDDIO/VSS、M/S# 必接 VDDIO、BS1=L=4 线——模块内部已配置不引出；画布 J6 13/14/12/11/10/9=SCL/SDA/CS#/D-C#/RES#/BUSY 与手册逐脚吻合 ✅
+- **ESP32-S3 IO MUX（datasheet Table 2-3 + WROOM-1 Table 3-1 原文）**：GPIO9=FSPIHD、GPIO10=**FSPICS0**（屏 CS 硬件片选）、GPIO11=**FSPID**（MOSI 硬件线）、GPIO12=**FSPICLK**（时钟硬件线）、GPIO13=FSPIQ、GPIO14=FSPIWP、GPIO43/44=U0TXD/U0RXD——屏/TF 共享 SPI 的硬件映射全部合法 ✅；TF MISO 走 GPIO21 经 GPIO matrix 路由（ESP-IDF sdspi 任意引脚合法）✅；"EN: Do not leave the EN pin floating"（WROOM-1 Table 3-1 原文，R1 上拉已证）✅
+- **参照源分级结论升级**：功能级核查的六项核心判据（Rd 阻值+拓扑、屏接口定义、IO MUX 映射、TF 模式引脚、EC11 定义、按键上拉策略）中，前五项已升 A 级；EC11 引脚定义与 TF SPI 模式为 B 级（ALPS/SD 规范通行资料，低风险）。
+
 **固件/调试注意事项**：
 1. **音源切换消 pop 序列**：切 GPIO39 前先拉低 GPIO41（功放关断）→ 切换 → 再拉高使能。
 2. **PCM5102A 输出 2.1Vrms@0dBFS 而功放增益内置不可调**——固件数字音量必须限制默认值，保证开关/功放输入节点摆幅在 0~VBAT 内，否则削顶失真。
