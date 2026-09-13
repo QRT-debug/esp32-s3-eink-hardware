@@ -627,6 +627,7 @@ C22：VGH→GND｜C23：VDH→GND｜C21：VDL→GND｜C19：VGL→GND｜C17：VC
 - **SSD1680 六线接口（Solomon Table 5-2/6-2 原文）**：4-wire SPI=SCL+SDA+D/C#+CS#（+RES#+BUSY），BUSY 高=忙、CS#/D/C# 不用时接 VDDIO/VSS、M/S# 必接 VDDIO、BS1=L=4 线——模块内部已配置不引出；画布 J6 13/14/12/11/10/9=SCL/SDA/CS#/D-C#/RES#/BUSY 与手册逐脚吻合 ✅
 - **ESP32-S3 IO MUX（datasheet Table 2-3 + WROOM-1 Table 3-1 原文）**：GPIO9=FSPIHD、GPIO10=**FSPICS0**（屏 CS 硬件片选）、GPIO11=**FSPID**（MOSI 硬件线）、GPIO12=**FSPICLK**（时钟硬件线）、GPIO13=FSPIQ、GPIO14=FSPIWP、GPIO43/44=U0TXD/U0RXD——屏/TF 共享 SPI 的硬件映射全部合法 ✅；TF MISO 走 GPIO21 经 GPIO matrix 路由（ESP-IDF sdspi 任意引脚合法）✅；"EN: Do not leave the EN pin floating"（WROOM-1 Table 3-1 原文，R1 上拉已证）✅
 - **参照源分级结论升级**：功能级核查的六项核心判据（Rd 阻值+拓扑、屏接口定义、IO MUX 映射、TF 模式引脚、EC11 定义、按键上拉策略）中，前五项已升 A 级；EC11 引脚定义与 TF SPI 模式为 B 级（ALPS/SD 规范通行资料，低风险）。
+- **TF 卡 CMD=GPIO11 / CLK=GPIO12 上拉判定（07:02，用户问"sd卡的io11和io12需要上拉吗"）**：**不需要，现图正确**。① Espressif ESP-IDF SDIO slave 文档原文 "the CMD and DAT0-3 signal lines should be pulled up … by 10 KOhm - 90 KOhm resistors"——适用对象是 **SD/SDIO 模式的总线**（卡侧开漏双向，主机与卡都可能释放总线），本项目走 **SPI 模式**，该条对主机侧不适用；② SPI 模式下 CLK=GPIO12(FSPICLK)、CMD=GPIO11(FSPID/MOSI) 由 ESP32-S3 **推挽输出全程主动驱动**，不存在高阻态，无需上拉（Microchip 官方 TF 座参考设计仅 DAT3/CS 挂 100k 上拉，CMD/CLK/D0 均无——B 级佐证；CLK 加上拉反增容性负载——C 级常识）；③ SPI 模式真正需要上拉的恰是画布已有的两根：**CS=GPIO8（R13 10k，上电保持高防误选通）✅、D0=GPIO21（R12 10k，MISO 高阻期防浮空）✅**；④ 上电浮空窗口无风险：TF CS=高→卡忽略总线，无时钟沿即无数据相位；与屏共享总线由 CS 分离仲裁（06:44 已核）。可选加固：比照 R12/R13 加两颗 10k 于 GPIO11/12——无害但不必须（Microchip 参考设计亦未加）。参照源：Espressif 文档=A、Microchip 参考设计=B、CSDN 实战文章=C（仅旁证）。
 
 **固件/调试注意事项**：
 1. **音源切换消 pop 序列**：切 GPIO39 前先拉低 GPIO41（功放关断）→ 切换 → 再拉高使能。
