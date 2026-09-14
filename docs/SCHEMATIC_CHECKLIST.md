@@ -797,3 +797,24 @@ C22：VGH→GND｜C23：VDH→GND｜C21：VDL→GND｜C19：VGL→GND｜C17：VC
 结论：三个历史存疑项（R10 封装、泵区 1µF 组封装、"贴片下单前按画布逐颗核对"）**全部关闭**，封装维度具备贴片下单条件。
 
 教训：① SVG 值文字存在 "100nF"（n 前缀）写法，值正则必须覆盖 n/p 前缀，否则 0.1µF 组会被误判为"无值"；② "画布未显示封装属性"的旧结论来自早期 SVG 肉眼观察——**封装有无的权威判据是网表 footprint 字段**（dict 有 name 即已设置），观察通道不同结论可以不同，以更硬的通道为准。
+
+
+**USB 区 + 音频链区手册级审计（2026-09-14 22:00，应用户要求按电池链路同标准执行）**：
+
+方法：活体网表逐脚（快照8，242 元件/102 网络）+ SVG 列文字值实证 + PNG 8x 渲染 NC 叉号核验 + 五份原厂手册原文对表（TI TS5A23157 SCDS165F、TI PCM510xA SLAS859C、纳芯威 NS4150B V1.1、ST USBLC6-2 DS4260、沁恒 CH340N 官方 PDF）。
+
+**音频链实测拓扑（画布位号：MOD1 实为 U4）**：BT 差分输出 U4.1/2/4/5 → C32–C35 耦合 → P 侧和（AUDL_R+AUDR_P，经 R19/R20 10k 求和）与 N 侧和（AUDL_N+AUDR_N，R21/R22）进 U15 TS5A23157 两通道 NO 触点；S3 的 U14.6/7 → C43/C42 → MIXSL/SR 经 R23/R24 求和进 NC1；COM1/COM2 → U16 NS4150C 差分输入 → J7 4Ω 喇叭。R25/R26 10k 下拉开机默认 = PCM 模式 + 功放关。
+
+**手册级核对全部通过（A 级原文）**：
+- TS5A23157 脚序与立创符号逐脚一致（官方 1=IN1/2=NO1/4=NO2/5=IN2/6=COM2/7=NC2/8=V+/9=NC1/10=COM1）；**脚 7=NC2 是"常闭信号触点"非无连接脚**——画布 NC2 经 C44 1µF 接地 = S3 单端模式下 INN 交流旁路（单端转换），与 R25"开机=PCM"的 truth table 语义自洽，判定为有意设计；V+ = VBAT(3.0–4.2V) 在 1.65–5.5V 范围内。
+- PCM5102A：AVDD/DVDD/CPVDD 均为外部 3.3V 输入（手册 Power Supply 原文 "AVDD … must be 3.3 V"、"DVDD … the input to the onchip LDO"）——画布挂 3V3 正确；LDOO 只挂去耦（原文 0.1µF，画布 C40=1µF 偏大无害备案）；**SCK→GND = 3-wire PLL 模式的官方要求**（SLAS859C §9.3.5.3 "SCK remains at ground level for 16 successive LRCK periods, then the internal PLL starts" + TI E2E 官方答复）；FLT/DEMP/FMT=GND、XSMT=3V3 均为合法定义；CAPP/CAPM 飞跨 C37、VNEG 去耦 C39 正确。
+- NS4150C：引脚映射与官方逐脚一致；**Bypass 脚 2 原文"接 1uF 电容至 GND"——C46=1µF 完全一致**；CTRL 低电平 Shutdown + R26 下拉 = 上电默认关；VCC 3.0–5.25V 含 VBAT 区间。
+- USBLC6-2SC6：ST 原文 "connections from the pin VBUS to VCC"——VBUS 脚接 3V3 正确且对 3.3V IO 钳位更紧；沁恒 ESD 条款"其正电压应该是 3.3V"双重实锤。
+- CH340N：3.3V 供电时 "V3 引脚应该与 VCC 引脚相连接"（原厂原文）——脚 5/8 短接 3V3 正确；C12 0.1µF 符合；TXD→RXD0(GPIO44)/RXD→TXD0(GPIO43) 交叉正确。
+- Type-C：CC1/CC2 各 5.1kΩ 独立下拉（R6–R9，SVG 实证 5.1kΩ）符合 USB-IF Rd；VBUS 经 D1/D2 OR 成 5V_OR → TP4056 VCC/CE，两口互不倒灌。
+
+**闸门③ NC 叉号渲染核验（绿色 #33CC33，全图 18 个）**：J3/J4 SBU1/SBU2 ×4、U10 RTS#、U4(MOD1) 悬空脚 12 个（K1–K3/MIC×3/MUTE/NC×2/VUSB/LED_L/ANT——ANT 叉 = 板载天线路径，与档案一致）、J7.3/4 定位脚——**USB/音频区悬空脚 NC 标记覆盖率 100%**；U11/U12/U14/U15/U16 零悬空脚。音频区无二极管/电解/MOS 极性器件。
+
+**故障时序三问（纪律 6）**：① 3V3 由 VBAT 生成（TPS63021），CTRL/SEL 下拉保证 GPIO 未初始化时功放关、开关在 PCM 侧；② VBAT 有而 3V3 塌（升压故障）时 U15 传 BT 断源输出（弱偏置静音）、U16 CTRL=0 关断——无反压无损；③ BT 播放中 3V3 塌 → 模块断、开关保持 BT 侧 → COM 输出经 10k 弱拉至 U16 输入偏置 → 静音。均无缺陷。
+
+**发现清单：真缺陷 0**。备案观察（非缺陷）：① 文档位号 MOD1 ≠ 画布位号 U4（BOM 已加映射公告）；② C44 原档案措辞"参考电容"不准，实为 S3 单端模式的 INN 交流旁路电容（BOM 已修正）；③ NS4150 典型应用差分输入各串 30K，画布信号路径等效串联 10k（混音求和电阻兼串联）——功能等效，低通截止点更高，实测音质时留意；④ C40(LDOO) 1µF vs 手册 0.1µF 偏大无害；⑤ U14 XSMT 固定 3V3 无固件静音，断电 pop 由芯片内建 clock-error 静音兜底；⑥ USBLC6 ESD 动作瞬间 3V3 轨有瞬态抬升（轨电容吸收）——行业常规做法。
