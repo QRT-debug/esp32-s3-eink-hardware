@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>丝印科技符号素材库</title>
+<style>
+  body { background:#14161a; color:#e8e8e8; font-family:"Segoe UI",system-ui,sans-serif; margin:0; padding:32px; }
+  h1 { font-size:22px; margin:0 0 6px; }
+  .sub { color:#9aa0a6; font-size:13px; margin-bottom:28px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:18px; }
+  .card { background:#1d2026; border:1px solid #2c313a; border-radius:10px; padding:14px; }
+  .card svg { width:100%; height:auto; display:block; background:#0d0f12; border-radius:6px; }
+  .card .name { margin-top:10px; font-size:14px; font-weight:600; }
+  .card .tip { color:#9aa0a6; font-size:12px; margin-top:2px; line-height:1.5; }
+  .note { background:#1d2026; border:1px solid #2c313a; border-radius:10px; padding:16px 20px; margin-top:28px; font-size:13px; line-height:1.8; color:#c8cdd4; }
+  .note b { color:#fff; }
+  code { background:#0d0f12; padding:1px 6px; border-radius:4px; font-size:12px; }
+</style>
+</head>
+<body>
+<h1>丝印科技符号素材库（单色线条版）</h1>
+<div class="sub">全部为矢量 SVG，白色描边、无填充 → 丝印层专用。配套的单个 .svg 文件在 docs/silk_art/ 目录下。</div>
+
+<div class="grid">
+
+<!-- 1 芯片 -->
+<div class="card">
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+<g stroke="#fff" stroke-width="4" fill="none">
+<rect x="55" y="55" width="90" height="90" rx="6"/>
+<rect x="80" y="80" width="40" height="40"/>
+<path d="M75 55 V30 M95 55 V30 M115 55 V30 M75 145 V170 M95 145 V170 M115 145 V170 M55 75 H30 M55 95 H30 M55 115 H30 M145 75 H170 M145 95 H170 M145 115 H170"/>
+<circle cx="62" cy="62" r="3" fill="#fff" stroke="none"/>
+</g>
+</svg>
+<div class="name">01 芯片裸 DIE</div>
+<div class="tip">经典 IC 轮廓+定位点，放角落呼应主控</div>
+</div>
+
+<!-- 2 齿轮 -->
+<div class="card">
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+<g stroke="#fff" stroke-width="4" fill="none">
+<circle cx="100" cy="100" r="38"/>
+<circle cx="100" cy="100" r="14"/>
+<g>
+<path d="M100 54 V32 M100 146 V168 M54 100 H32 M146 100 H168 M67.5 67.5 L52 52 M132.5 132.5 L148 148 M67.5 132.5 L52 148 M132.5 67.5 L148 52"/>
+</g>
+<path d="M84 32 h32 M84 168 h32 M32 84 v32 M168 84 v32"/>
+</g>
+</svg>
+<div class="name">02 机械齿轮</div>
+<div class="tip">八齿简化版，机械感最强的一个</div>
+</div>
+
+<!-- 3 准星 -->
+<div class="card">
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+<g stroke="#fff" stroke-width="4" fill="none">
+<circle cx="100" cy="100" r="60"/>
+<circle cx="100" cy="100" r="34"/>
+<path d="M100 22 V56 M100 144 V178 M22 100 H56 M144 100 H178"/>
+<path d="M100 88 a12 12 0 0 1 12 12" stroke-width="3"/>
+<circle cx="100" cy="100" r="3" fill="#fff" stroke="none"/>
+</g>
+</svg>
+<div class="name">03 十字准星</div>
+<div class="tip">仪器面板风，适合放在测试点/调试口旁</div>
+</div>
+
+<!-- 4 六边形簇 -->
+<div class="card">
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+<g stroke="#fff" stroke-width="4" fill="none">
+<path d="M100 60 L135 80 V120 L100 140 L65 120 V80 Z"/>
+<path d="M100 60 V28 M135 80 L163 64 M65 80 L37 64 M135 120 L163 136 M65 120 L37 136"/>
+</g>
+</svg>
+<div class="name">04 六边形卫星</div>
+<div class="tip">化学键/网格卫星节点，中心可放字</div>
+</div>
+
+<!-- 5 电路走线 -->
+<div class="card">
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+<g stroke="#fff" stroke-width="4" fill="none">
+<path d="M30 40 H80 V90 H130 V50"/>
+<path d="M30 160 H70 V120 H120 V160 H170"/>
+<circle cx="30" cy="40" r="7"/>
+<circle cx="130" cy="50" r="7"/>
+<circle cx="30" cy="160" r="7"/>
+<circle cx="170" cy="160" r="7"/>
+<path d="M150 30 a16 16 0 1 0 0.01 0" stroke-width="3"/>
+</g>
+</svg>
+<div class="name">05 走线+过孔环</div>
+<div class="tip">和你板上真实走线视觉呼应，装饰性最地道</div>
+</div>
+
+<!-- 6 像素机器人 -->
+<div class="card">
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+<g fill="#fff">
+<path d="M60 70 h20 v20 h-20z M120 70 h20 v20 h-20z"/>
+<path d="M60 110 h80 v20 h-80z"/>
+<path d="M70 130 v16 h8 v-16z M90 130 v16 h8 v-16z M110 130 v16 h8 v-16z"/>
+<path d="M85 30 h30 v8 h-30z M96 38 h8 v32 h-8z"/>
+</g>
+</svg>
+<div class="name">06 像素机器人头</div>
+<div class="tip">复古电子风，下带按键区很搭</div>
+</div>
+
+<!-- 7 点阵 -->
+<div class="card">
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+<g fill="#fff">
+<circle cx="56" cy="72" r="7"/><circle cx="86" cy="72" r="7"/><circle cx="116" cy="72" r="7"/><circle cx="146" cy="72" r="7"/>
+<circle cx="56" cy="102" r="7"/><circle cx="86" cy="102" r="7"/><circle cx="116" cy="102" r="7"/><circle cx="146" cy="102" r="7"/>
+<circle cx="56" cy="132" r="7"/><circle cx="86" cy="132" r="7"/><circle cx="116" cy="132" r="7"/><circle cx="146" cy="132" r="7"/>
+</g>
+</svg>
+<div class="name">07 圆点阵列</div>
+<div class="tip">均匀点阵可以自由裁切成任意形状填充</div>
+</div>
+
+<!-- 8 频谱条 -->
+<div class="card">
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+<g fill="#fff">
+<rect x="40" y="130" width="14" height="30"/>
+<rect x="62" y="100" width="14" height="60"/>
+<rect x="84" y="70" width="14" height="90"/>
+<rect x="106" y="44" width="14" height="116"/>
+<rect x="128" y="80" width="14" height="80"/>
+<rect x="150" y="112" width="14" height="48"/>
+</g>
+</svg>
+<div class="name">08 音频频谱条</div>
+<div class="tip">放喇叭/音频区旁边，点明功能</div>
+</div>
+
+<!-- 9 墨滴 -->
+<div class="card">
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+<g stroke="#fff" stroke-width="4" fill="none">
+<path d="M100 30 C100 30 55 92 55 128 a45 45 0 0 0 90 0 C145 92 100 30 100 30 Z"/>
+<path d="M78 128 a22 22 0 0 0 22 22" stroke-width="3"/>
+</g>
+</svg>
+<div class="name">09 墨水滴</div>
+<div class="tip">墨水屏的主题符号，推荐做主视觉</div>
+</div>
+
+<!-- 10 闪电 -->
+<div class="card">
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+<g stroke="#fff" stroke-width="4" fill="none" stroke-linejoin="round">
+<path d="M112 28 L64 108 H96 L82 172 L138 88 H106 Z"/>
+</g>
+</svg>
+<div class="name">10 闪电能量</div>
+<div class="tip">放电池/充电区旁</div>
+</div>
+
+<!-- 11 无线波 -->
+<div class="card">
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+<g stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round">
+<circle cx="100" cy="140" r="9" fill="#fff" stroke="none"/>
+<path d="M76 118 a34 34 0 0 1 48 0"/>
+<path d="M60 100 a56 56 0 0 1 80 0"/>
+<path d="M44 82 a78 78 0 0 1 112 0"/>
+</g>
+</svg>
+<div class="name">11 无线电波</div>
+<div class="tip">放蓝牙模组/天线附近（别压天线本体）</div>
+</div>
+
+<!-- 12 电池 -->
+<div class="card">
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+<g stroke="#fff" stroke-width="4" fill="none">
+<rect x="50" y="76" width="90" height="48" rx="6"/>
+<rect x="140" y="90" width="12" height="20" rx="2" fill="#fff" stroke="none"/>
+<path d="M62 88 v24 M76 88 v24 M90 88 v24 M104 88 v24" stroke-width="6"/>
+</g>
+</svg>
+<div class="name">12 电池电量</div>
+<div class="tip">放电池接口/充电 IC 附近</div>
+</div>
+
+</div>
+
+<div class="note">
+<b>导入方法（EasyEDA）</b>：顶部菜单 <code>放置 → 图片</code>（或快捷键 <code>Alt+P</code> 里找 Image），选 <code>docs/silk_art/</code> 下的 .svg 文件 → 放置后双击图片，把所在层改为 <code>TopSilkLayer</code>。<br>
+<b>三个使用注意</b>：① 单个 .svg 文件在这个网页旁边的 <code>docs/silk_art/</code> 文件夹里，共 12 个；② 丝印最小线宽厂里一般做到 0.15mm，这些符号导入后如果缩得太小，细线可能糊——缩放时保持符号整体尺寸 ≥5mm 比较稳；③ 放置避开焊盘和位号，符号与铜不冲突所以无 DRC 风险，但会挡阻焊印刷区域视觉，尽量放空地。<br>
+<b>组合建议</b>：铭牌（三行文字）配 09 墨滴做 logo；喇叭旁配 08；测试点旁配 03。
+</div>
+
+</body>
+</html>
