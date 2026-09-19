@@ -164,3 +164,24 @@ Waveshare 2.7" e-Paper 官方规格书 §6.3 实测（此前文档里的 +16V/�
 **副作用**：料号种类从 44 减至 **43**（C91186 退出），且 24 颗全部落在**立创基础库（Basic Part）**，走 SMT 时免上料费。
 
 **重要澄清（不改板）**：50V 用在这些低压位置（3V3 / VCOM / VBAT / 音频耦合去耦）**完全无副作用**——耐压只是上限，实际工作电压不变；介质更厚反而使直流偏压下的容值保持率更好。
+
+## 十、改料后一致性核验（2026-09-20 01:10，用户质疑「点开产品链接还是 25V」）
+
+**结论：原理图实际参数确为 50V，无错。** 三条独立证据：
+
+| 证据层 | 方法 | 结果 |
+|---|---|---|
+| ① 属性字段 | 活体 `sch list` 全字段 | 24 颗 1µF **全部** `supplierId=C28323` / `manufacturerId=CL21B105KBFNNNE` / `Voltage Rating=50V` / `Description=…额定电压:50V…` / `JLCPCB Part Class=Basic Part`；全 JSON 搜索 **0 处** 出现 `25V` 或 `C91186` |
+| ② 平台自解析 | `easyeda call schematic.component.resolve_lcsc`（dry-run） | **121/121 全部解析成功、0 unresolved**；24 颗 1µF → **C28323**（`via=instance`，即实例自身料号就是真实 C 号），C26 → **C162420** |
+| ③ 换型号动作 | `easyeda call schematic.component.replace --lcsc C28323` | 被拒：`INVALID_STATE — Target device is the SAME as the placed one (89c7d63b…)`（89c7d63b 正是 C28323 的 device uuid）⇒ **平台认为这些件已经是 C28323** |
+
+**用户看到 25V 的原因**：`sch modify` 只改**属性**、改不了**库器件绑定**（patch 顶层键白名单不含 `component`/`symbol`/`device`/`subPartName`）。故改过的 23 颗仍残留 `component.name = CC0805KKX7R8BB105`（C91186 的 YAGEO 料名）、`component.uuid = dc0c2959b4e0c3e6`（旧器件）。UI 的「器件名 / 产品链接」跟的是这个残留绑定 ⇒ 显示 25V。**这是显示层残留，不是参数错。**
+
+**影响面（实测）**：
+- BOM / 配单 / 贴片坐标 / Gerber 一律读**属性字段** ⇒ 全部 50V，正确；
+- `footprint.uuid` 新旧完全相同（`a842fbe912926f2c`）⇒ **PCB 零影响**；
+- 试跑 replace 前后逐脚网络对比 **24/24 连线 0 变化**。
+
+**工具现状**：无 API 可改写该残留绑定（`component.replace` 因"已相同"被拒；`schematic.rebind.symbol/footprint` 只管符号/封装）。**规避**：不要用 EasyEDA 的「器件标准化 / 更新器件」面板去"刷新"这批电容——那会按残留绑定把属性退回 25V。
+
+**建议动作**：在 EDA 里 Ctrl+S 并切换/重开原理图页签让 UI 重取；若器件名仍显示 YAGEO，属已知残留，不影响下单与生产。
