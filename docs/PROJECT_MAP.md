@@ -1,10 +1,13 @@
 # Project Map
 
+> ⚡ **当前状态见 `docs/NOW.md`**（2026-09-21：原理图 + PCB 完成、**板已打样**、硬件冻结，唯一未决 = 屏装配朝向）。
+> 本文件描述**工程结构、EDA 客户端与工具链**，属"稳定理解"，不描述进度。
+
 ## Project Identity
 
 - repository type：EasyEDA Pro 硬件工程（当前无源代码）
 - primary language(s)：无源代码；工程数据为 EasyEDA Pro 自定义 JSON
-- main runtime/platform：目标硬件 ESP32-S3 + 电子墨水屏（尚未设计）
+- main runtime/platform：**ESP32-S3 + 2.7" 墨水屏主板 —— 设计已完成并打样**（95×95mm / 2 层 / 121 器件 / 102 网络）
 - build system or IDE：EasyEDA Pro（嘉立创 EDA 专业版）3.2.175
 
 ## Startup Chain
@@ -42,10 +45,12 @@
 
 ## Active Communication Chains
 
-尚未建立。规划中的链路（详见 `docs/DESIGN.md`）：
+**已全部实现并验证（2026-09-21）**，规划依据见 `docs/DESIGN.md`，实际连接以活体画布 / `docs/SCHEMATIC_CHECKLIST.md` 为准：
 
-- ESP32-S3 ↔ e-ink：SPI2（GPIO9-14，4 MHz，Mode 0），SSD1680 兼容三色屏（详见 `docs/DESIGN.md`）
-- USB-C：供电与固件烧录（ESP32-S3 原生 USB OTG）
+- ESP32-S3 ↔ e-ink：SPI2（GPIO9–14），SSD1680 兼容；两路屏口共用 SPI、**同时只接一个** —— `J6`=24P FPC 直插裸屏，`J1`=9P 排针接微雪驱动板。
+- USB-C ×2（供电 + 固件烧录）：J3/J4 经 SS34 或门（D1/D2）汇 `5V_OR` → TP4056 充电（1A）/ TPS63021 升降压；CH340N 提供串口。
+- 音频：U4 蓝牙模组（模拟差分）+ PCM5102A（I2S）→ U15 二选一 → NS4150C → J7 喇叭。
+- I²C：MAX17048 电量计 + SHT30 温湿度（GPIO1/2）；SD 卡（J2）；EC11 编码器 + 4 按键 + 3 LED。
 
 ## Related Projects
 
@@ -54,9 +59,10 @@
 
 ## Core Business Objects
 
-- SCH_PAGE `P1`：uuid `0c45ca5ef2f54c85`，属 `Schematic1`（uuid `e33852be3c71d9f4`）；当前以用户手动绘制为主，按 `docs/SCHEMATIC_CHECKLIST.md` 阶段 1 推进；具体画布内容以用户实际保存状态为准。
-- PCB `PCB1`：uuid `11bed811bd472bdb`；待原理图完成后再导入并布局布线。
-- 判读工程是否有内容：读 `.eprj2` 的 `documents` 行数，以及 `project_structures` 最新快照里对应 doc 的 `source` 是否为空串。两者都空 = 空白画布。
+- SCH_PAGE `P1`：uuid `0c45ca5ef2f54c85`，属 `Schematic1`（uuid `e33852be3c71d9f4`）；**已完成**（226 器件 / 99 网络，悬空脚全为设计性 NC）。
+- PCB `PCB1`：uuid `11bed811bd472bdb`；**已完成**（121 器件 / 102 网络全布通 / `pcb drc` passed-0），板已打样。
+- ⚠️ **`Board1` 绑定**：2026-09-21 已把 `schematic1`（`e33852be3c71d9f4`）绑进 `Board1`（此前 schematicUuid 为 null，导致「从原理图导入变更」被挡）。
+- 判读工程是否有内容：读 `.eprj2` 的 `documents` 行数，以及 `project_structures` 最新快照里对应 doc 的 `source` 是否为空串（该版本 `documents` 恒为 0，判据见下）。
 
 ## .eprj2 只读解析速查（2026-09-10 复核补充）
 
@@ -70,8 +76,8 @@
 
 ## Currently Enabled vs Present In Tree
 
-- 活跃：SCH_PAGE `P1`、PCB `PCB1`（均仍为空白骨架；2026-09-10 22:37 复核确认画布为空）。
-- 存在但无实际设计内容：BOARD、Panel、CONFIG 段（仅元数据壳）；`project_structures` 有 49 条历史版本快照，但内容均为空结构。
+- 活跃：SCH_PAGE `P1`（成品原理图）、PCB `PCB1`（成品 PCB，已打样）。
+- `project_structures` 保留多版历史快照；**该版本的 `documents` 表恒为 0 行** ⇒ 判"画布有没有内容"只能靠 `easyeda sch read` / `pcb dump` 的件数与网络数，不能靠表行数。
 - 仓库**已于 2026-09-11 初始化为 git 仓库**，远端 `https://github.com/QRT-debug/esp32-s3-eink-hardware.git`，分支 `main`。
   - 首个提交 `859ccee`（9 文件 / 1044 行，工程文档与交接文件），叠在远端自动生成的 `3a50caf Initial commit`（仅 `README.md`）之上。
   - `.workbuddy/` 已随 `.gitignore` 排除（会话数据、日志、EDA 导出工件不入库）；`.gitattributes` 统一 `eol=lf`。
@@ -80,6 +86,8 @@
   - **网络不稳定，直连与代理都要会试**：2026-09-11 实测中直连时而可用、时而 `Failed to connect … port 443` / `Recv failure: Connection was reset`；此时改走本机代理 `http://127.0.0.1:7897` 即可（实测可用）。**不要把 `http.proxy` 写进仓库配置**——用户的代理并非常开，写死会让他在自己终端里反而推不动。
   - **每次推送后必须核实**：`git ls-remote origin main` 与本地 `rev-parse HEAD` 比对哈希；`push` 返回 0 不代表成功（本轮就遇到 push 报成功但随后查询失败的情况，靠哈希比对才确认真正落地）。
   - **`.gitignore` 覆盖 `.workbuddy/`（会话数据）与 `.easyeda/`（easyeda-agent 导出工件）**，这两类都不入库。
+  - **当前同步状态（2026-09-21 22:05 实测）**：`git ls-remote origin main` = `9a19f63` = 本地 `HEAD` ⇒ **远端与本地一致，无待推送提交**。
+  - 本机 `refs/remotes/origin/main` 引用文件**仍会缺失**（`git branch -vv` 显示 `[origin/main: gone]`，属假警报）。修法：把 `git rev-parse HEAD` 的结果写入 `.git/refs/remotes/origin/main`。
 
 ## Known Suspicious Areas
 
