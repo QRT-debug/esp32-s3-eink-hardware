@@ -9,10 +9,10 @@ ESP32-S3 驱动电子墨水屏（e-ink）的硬件设计工程，使用嘉立创
 
 ## Reading Priorities
 
-1. `docs/NOW.md`（**现状与接续卡，约 4KB —— 先读这个**：当前状态 / 已定稿结论 / 唯一阻塞 / 待办 / 省上下文纪律）
+1. `docs/NOW.md`（**现状与接续卡，约 6KB —— 先读这个**：当前状态 / 已定稿结论 / 唯一阻塞 / 待办 / 省上下文纪律）
 2. `docs/HANDOFF.md`（完整交接记录；**只读开头 30 行**，其余按需 Grep，不要整篇读）
 3. `docs/PROJECT_MAP.md`（工程文件结构、EDA 客户端/工具链、`.eprj2` 只读解析速查）
-4. 按主题再读 `docs/` 其它大文档（`EPD_SPEC.md` 95KB / `SCHEMATIC_CHECKLIST.md` 134KB / `ROUTING_REPORT.md` / `PCB_PLAN.md` / `BOM.md`）——**一律用 Grep 或 offset+limit 定点读**
+4. 按主题再读 `docs/` 其它大文档（`EPD_SPEC.md` 95KB / `SCHEMATIC_CHECKLIST.md` 136KB / `ROUTING_REPORT.md` / `PCB_PLAN.md` / `BOM.md`）——**一律用 Grep 或 offset+limit 定点读**
 5. `ProPrj_esp32-s3-eink-hardware_2026-09-10.epro2`（早期空白导出快照；**已过时，勿作依据**）
 
 ## Runtime Facts
@@ -49,7 +49,7 @@ ESP32-S3 驱动电子墨水屏（e-ink）的硬件设计工程，使用嘉立创
 5. 读 `docs/HANDOFF.md`（只读开头 30 行；历史细节按需 Grep，**不要整篇读**）。
 6. 从最后一个未决问题继续（当前 = 屏装配朝向），不要从头重新勘察仓库。
 
-**省上下文纪律（直接决定会话卡不卡）**：单日日志最大 130KB、`SCHEMATIC_CHECKLIST.md` 134KB、`EPD_SPEC.md` 95KB ⇒
+**省上下文纪律（直接决定会话卡不卡）**：单日日志最大 130KB、`SCHEMATIC_CHECKLIST.md` 136KB、`EPD_SPEC.md` 95KB ⇒
 查历史先看 `.workbuddy/memory/DAILY_INDEX.md` 定位行号再定点读；大 JSON 先落盘只回传摘要；一个对话只做一件事。
 
 ## Closeout Workflow
