@@ -485,6 +485,13 @@ J6 插槽口     约 x=3603，距板边仅 138 mil (3.5 mm)
 - **首件必测**：`L1` 温度、刷新时间（应 ≈ 3 s）、VGH/VGL 建立；若泵力不足或 `L1` 明显发热 ⇒ 按 §12.7.6 换料。
 
 ### 12.7.6 `L1` 换料候选：同焊盘（3.5×3.0）里能换什么
+> ### ✅【2026-09-21 已实施】`L1` 换料已完成，原理图侧生效
+> - 活体操作记录：`schematic.component.replace`（primitiveId `f35459c8529f3ccd` → 新 `4cecaacf22840b1b`，**uniqueId `gge79` 保留**）⇒ `easyeda sch modify --patch-file` 补齐 10 项属性。
+> - 终验：`supplierId=**C2826626**` / `manufacturerId=CD32-470M 47UH` / `Value=**47uH**` / `Current Rating=**470mA**` / `DCR=**1.25Ω**`；位置 (1135,1270) 与 rotation 未变；`sch drc` = **0 fatal / 0 error**、`sch check` = **0 悬空脚 / 0 断线**。
+> - ⚠️ **换绑过程踩到的坑（已修复）**：`replace` 之后新 device 的 `otherProperty` 全为空；补属性的那次 `modify` 又把 **`supplierId` 侧写坏成 `CD32-470M.1`**（正是历史记过的"第二次 modify 侧写"现象）⇒ 用最小 patch `{"supplierId":"C2826626"}` 修回。**教训：换型号必须"replace → 一次性补全属性 → 单独修 supplierId → 终验全字段"。**
+> - ⏳ **待办**：`pcb import-changes` 需在 EasyEDA 窗口人工确认（该动作 `needsConfirm=true`，CLI 无自动确认开关，两次调用均超时）；确认导入后跑 `pcb drc` 复核 L1 焊盘是否仍为 **2 盘 / 中心距 90.6mil / 51.2×122.8mil**；若焊盘被改动，需重查布线或回退。
+> - 📌 **口径更正**：BOM 09-14 那条"泵峰值 <100mA ⇒ 余量 4 倍"把**负载电流**当成了**电感峰值**；boost 电感峰值由 RESE 限流点决定（官方按 500mA 设计）⇒ 380mA 偏紧，这才有本轮换料。
+
 
 **本板 `L1` 的实测焊盘**（活体 `pcb dump --doc PCB1`）：器件 `CD32-680M 68UH`（DMBJ 振宝佳，**C2826627**），封装 `IND-SMD_L3.5-W3.0`，
 **2 个焊盘、中心距 90.6 mil = 2.30 mm、每个 51.2 × 122.8 mil（1.30 × 3.12 mm）**；DCR 1.82 Ω。
