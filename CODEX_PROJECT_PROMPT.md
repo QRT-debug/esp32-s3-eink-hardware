@@ -6,10 +6,11 @@ ESP32-S3 驱动电子墨水屏（e-ink）的硬件设计工程，使用嘉立创
 
 ## Reading Priorities
 
-1. `docs/HANDOFF.md`（最新状态、已确认结论、未决问题）
-2. `docs/DESIGN.md`（硬件设计简报与方案选型）
+1. `docs/NOW.md`（**现状与接续卡，约 2.5KB —— 先读这个**：当前状态 / 已定稿结论 / 唯一阻塞 / 待办 / 省上下文纪律）
+2. `docs/HANDOFF.md`（完整交接记录；**只读开头 30 行**，其余按需 Grep，不要整篇读）
 3. `docs/PROJECT_MAP.md`（工程文件结构与 `.epro2` 解析方法）
-4. `ProPrj_esp32-s3-eink-hardware_2026-09-10.epro2`（EasyEDA 工程本体，只读参考）
+4. 按主题再读 `docs/` 其它大文档（`EPD_SPEC.md` 95KB / `SCHEMATIC_CHECKLIST.md` 134KB / `DESIGN.md` / `BOM.md` / `ROUTING_REPORT.md`）——**一律用 Grep 或 offset+limit 定点读**
+5. `ProPrj_esp32-s3-eink-hardware_2026-09-10.epro2`（EasyEDA 工程本体，只读参考；已过时，勿作依据）
 
 ## Runtime Facts
 
@@ -37,9 +38,13 @@ ESP32-S3 驱动电子墨水屏（e-ink）的硬件设计工程，使用嘉立创
 
 1. 若本地技能 `project-handoff-resume` 可用，则使用它。
 2. 读本文件。
-3. 读 `docs/PROJECT_MAP.md`。
-4. 读 `docs/HANDOFF.md`。
-5. 从最后一个未决问题继续，不要从头重新勘察仓库。
+3. 读 `docs/NOW.md`（**现状卡，先读它**）。
+4. 读 `docs/PROJECT_MAP.md`。
+5. 读 `docs/HANDOFF.md`（只读开头 30 行；历史细节按需 Grep，**不要整篇读**）。
+6. 从最后一个未决问题继续，不要从头重新勘察仓库。
+
+**省上下文纪律（直接决定会话卡不卡）**：单日日志最大 130KB、`SCHEMATIC_CHECKLIST.md` 134KB、`EPD_SPEC.md` 95KB ⇒
+查历史先看 `.workbuddy/memory/DAILY_INDEX.md` 定位行号再定点读；大 JSON 先落盘只回传摘要；一个对话只做一件事。
 
 ## Closeout Workflow
 
