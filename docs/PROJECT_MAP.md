@@ -86,12 +86,13 @@
   - **网络不稳定，直连与代理都要会试**：2026-09-11 实测中直连时而可用、时而 `Failed to connect … port 443` / `Recv failure: Connection was reset`；此时改走本机代理 `http://127.0.0.1:7897` 即可（实测可用）。**不要把 `http.proxy` 写进仓库配置**——用户的代理并非常开，写死会让他在自己终端里反而推不动。
   - **每次推送后必须核实**：`git ls-remote origin main` 与本地 `rev-parse HEAD` 比对哈希；`push` 返回 0 不代表成功（本轮就遇到 push 报成功但随后查询失败的情况，靠哈希比对才确认真正落地）。
   - **`.gitignore` 覆盖 `.workbuddy/`（会话数据）与 `.easyeda/`（easyeda-agent 导出工件）**，这两类都不入库。
-  - **当前同步状态（2026-09-21 22:30 实测）**：远端 `main` = `9a19f63`；本地**领先若干笔待推送** ——
-    **笔数以 `git status -sb` 的 `ahead N` 为准**（交接整理完成时为 3 笔）。
-    ⚠️ **agent 侧无法推送**（`git push` 报 `could not read Username for 'https://github.com': terminal prompts disabled`，
-    凭据需交互输入）⇒ **推送要在用户自己的终端执行** `git push origin main`。
+  - **当前同步状态（2026-09-21 22:5x 实测）**：**本地与远端一致**，`main` = `c400fc3`；`git status -sb` 无 `ahead`，
+    `git log origin/main..HEAD` 为空。（历史记录：22:0x~22:3x 期间曾出现"远端落后本地若干笔"，已随推送消除。）
+  - ⚠️ **"agent 无法推送"是场景性结论，不是铁律**：沙箱注入的 `HTTP_PROXY`/`HTTPS_PROXY` 会挡住 github，请先剔除全部 proxy 变量再试；
+    实测本机 GCM 凭据可用，`git push origin main` 多次成功（含 09-21 22:0x）。只有在报
+    `could not read Username for 'https://github.com': terminal prompts disabled` 时才交给用户在自己的终端执行。
   - 本机 `refs/remotes/origin/main` 引用文件**会缺失**（`git branch -vv` 显示 `[origin/main: gone]`，属假警报）。
-    修法：把 `git rev-parse HEAD` 的结果写入 `.git/refs/remotes/origin/main`（2026-09-21 已补写一次）。
+    修法：把 `git rev-parse HEAD` 的结果写入 `.git/refs/remotes/origin/main`。
 
 ## Known Suspicious Areas
 
