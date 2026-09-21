@@ -1,6 +1,6 @@
 # NOW — 现状与接续卡
 
-> **⚡ 新会话先读本文件（约 2.5KB），再决定要不要深挖。**
+> **⚡ 新会话先读本文件（约 4KB ≈ 2k token），再决定要不要深挖。**
 > 深挖入口：`docs/HANDOFF.md`（完整交接，44KB）· `docs/EPD_SPEC.md`（屏，95KB，按 §12.x 引用）·
 > `docs/ROUTING_REPORT.md`（布线/DFM/过孔载流）· `docs/BOM.md` · `docs/PCB_PLAN.md`。
 > **怎么开新会话** → 见本文件最后一节。
@@ -50,7 +50,7 @@ ESP32-S3 墨水屏设备（95×95mm 双层板，121 器件 / 102 网络）**已�
 然后继续这个工程，不要从头重新勘察仓库。
 ```
 
-只读 `docs/NOW.md`（约 1k token）就够起步；**HANDOFF 只读开头 30 行**，其余按需 Grep。
+只读 `docs/NOW.md`（4KB ≈ 2k token）就够起步；**HANDOFF 只读开头 30 行**，其余按需 Grep。
 
 ## 省上下文的三条纪律（重要，直接决定卡不卡）
 

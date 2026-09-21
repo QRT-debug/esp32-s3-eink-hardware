@@ -6,7 +6,7 @@ ESP32-S3 驱动电子墨水屏（e-ink）的硬件设计工程，使用嘉立创
 
 ## Reading Priorities
 
-1. `docs/NOW.md`（**现状与接续卡，约 2.5KB —— 先读这个**：当前状态 / 已定稿结论 / 唯一阻塞 / 待办 / 省上下文纪律）
+1. `docs/NOW.md`（**现状与接续卡，约 4KB —— 先读这个**：当前状态 / 已定稿结论 / 唯一阻塞 / 待办 / 省上下文纪律）
 2. `docs/HANDOFF.md`（完整交接记录；**只读开头 30 行**，其余按需 Grep，不要整篇读）
 3. `docs/PROJECT_MAP.md`（工程文件结构与 `.epro2` 解析方法）
 4. 按主题再读 `docs/` 其它大文档（`EPD_SPEC.md` 95KB / `SCHEMATIC_CHECKLIST.md` 134KB / `DESIGN.md` / `BOM.md` / `ROUTING_REPORT.md`）——**一律用 Grep 或 offset+limit 定点读**
