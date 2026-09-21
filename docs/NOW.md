@@ -3,7 +3,7 @@
 > **⚡ 新会话先读本文件（约 4KB ≈ 2k token），再决定要不要深挖。**
 > 读取链：**本文件 → `CODEX_PROJECT_PROMPT.md`（读取顺序/工作流）→ 按主题读 `docs/`**。
 > 深挖入口：`docs/HANDOFF.md`（完整交接，44KB）· `docs/EPD_SPEC.md`（屏，95KB，按 §12.x 引用）·
-> `docs/ROUTING_REPORT.md`（布线/DFM/过孔载流）· `docs/BOM.md` · `docs/PCB_PLAN.md`。
+> `docs/ROUTING_REPORT.md`（布线/DFM/过孔载流）· `docs/BOM.md` · `docs/PCB_PLAN.md` · `docs/AUDIO_COMPARE.md`（音频路线对比）。
 > **怎么开新会话** → 见本文件最后一节。
 > 更新时间：2026-09-21 22:40。本文件是"当前状态"，历史状态看 HANDOFF 的 09-19 / 09-13 两块。
 > **仓库同步**：远端 `main` = `9a19f63`；本地**领先若干笔待推送** —— **具体笔数以 `git status -sb` 的 `ahead N` 为准**
