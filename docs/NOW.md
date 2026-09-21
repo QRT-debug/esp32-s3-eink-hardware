@@ -5,8 +5,10 @@
 > 深挖入口：`docs/HANDOFF.md`（完整交接，44KB）· `docs/EPD_SPEC.md`（屏，95KB，按 §12.x 引用）·
 > `docs/ROUTING_REPORT.md`（布线/DFM/过孔载流）· `docs/BOM.md` · `docs/PCB_PLAN.md`。
 > **怎么开新会话** → 见本文件最后一节。
-> 更新时间：2026-09-21 22:30。本文件是"当前状态"，历史状态看 HANDOFF 的 09-19 / 09-13 两块。
-> **仓库同步**：远端 `main` 与本地一致（`9a19f63`），**无待推送提交**。
+> 更新时间：2026-09-21 22:40。本文件是"当前状态"，历史状态看 HANDOFF 的 09-19 / 09-13 两块。
+> **仓库同步**：远端 `main` = `9a19f63`，本地 = `cf340d3` ⇒ **本地领先 1 笔（待推送）**。
+> ⚠️ **本 agent 侧推不上去**（GitHub 凭据需交互输入，报 `could not read Username ... terminal prompts disabled`）；
+> 请在你自己终端执行 `git push origin main`。已有"28 笔待推送"的旧说法**已作废**（本轮已全部推送完，仅剩这 1 笔）。
 
 ## 一句话
 
