@@ -94,7 +94,7 @@
 | Border waveform (0x3C) | 0x05（解决边缘杂色） |
 | Temperature sensor (0x18) | 0x80（内部传感器） |
 | Display update control 1 (0x21) | 0x80, 0x80 |
-| Display update control 2 (0x22) | 0xF7（完整刷新） |
+| Display update control 2 (0x22) | 0xF7（完整刷新）· ⚠️ **保持此值** —— `0xFF`（Mode 2）实测 620 ms 但**观感泛白、不合格**，见 `EPD_SPEC §17.6` |
 
 ### PCB 设计注意事项（来自固件交接）
 
