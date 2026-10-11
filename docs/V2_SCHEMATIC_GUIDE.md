@@ -281,9 +281,13 @@ GPIO15 ──→ 1K ──→ 基极 ；  基极 ──→ 10K ──→ GND
 **核验依据（一手）**：`ESP32-S3-WROOM-1` 模组数据手册 **Table 3-1 引脚定义**（逐脚的原生外设功能）+ V1 活体网表逐脚比对。
 **U1 型号已确认**：**`ESP32-S3-WROOM-1-N16R8`**（立创 `C2913202` · 乐鑫）—— ★ **不是 "V" 版** ⇒ **`GPIO47` / `48` 为 3.3 V**（只有 V 版才是 1.8 V）。与 `esptool flash_id` 报出的 `Embedded PSRAM 8MB (AP_3v3)` **互相印证**。
 
-#### 3.10.1 完整分配表（含该脚的"原生外设功能"，用于核验）
+#### 3.10.1 完整分配表（含该脚的 **IO_MUX 固定功能**）
 
-| GPIO | V2 用途 | 该脚在 WROOM-1 上的原生功能 | 核验 |
+> ⚠️ **先看这条，否则会误读整张表**：右列是**数据手册 Table 3-1 的「IO_MUX 固定功能」** —— 它**只表示"硬件直连"的那几路外设，并不代表这个脚只能做这些**。
+> **UART / I2C / I2S / SPI2 / LEDC 都能通过 GPIO Matrix 路由到几乎任意 GPIO**，所以"**表里没写的，照样能用**"。判据与查法见 **§3.10.4**。
+> 典型误解：`GPIO3` 的固定功能只有 `TOUCH3 / ADC1_CH2`，**没有任何 UART** —— 但它**能做 UART1 RX**，靠的就是矩阵。
+
+| GPIO | V2 用途 | 该脚的 IO_MUX 固定功能 | 实现方式 / 核验 |
 |---|---|---|---|
 | **`1`** | VBUS 检测（ADC）| RTC_GPIO1 · TOUCH1 · **ADC1_CH0** | ✅ ADC1（不与 WiFi 冲突）|
 | **`2`** | CC1 检测（ADC）| RTC_GPIO2 · TOUCH2 · **ADC1_CH1** | ✅ 同上 |
@@ -364,6 +368,45 @@ GPIO15 ──→ 1K ──→ 基极 ；  基极 ──→ 10K ──→ GND
 - **SPI 走 IO_MUX ⇒ 不受 80 MHz 限制**（走矩阵才受限）
 - **`GPIO21` 是唯一"纯净"脚**
 - **U1 = N16R8（非 V 版）⇒ `GPIO47` / `48` 是 3.3 V**
+
+#### 3.10.4 ★★ 怎么查"某个脚能不能做某个外设"（两张表，缺一不可）
+
+**核心概念：ESP32-S3 的引脚功能分两层。** 只看一层，必然得出错误结论。
+
+| 层 | 是什么 | 去哪查 | 回答什么问题 |
+|---|---|---|---|
+| **① IO_MUX**（固定功能）| 每个脚**硬件直连**的那几路外设 | **数据手册** Table 3-1「Pin Definitions」；SDK 里是 `components/soc/esp32s3/register/soc/io_mux_reg.h`（看 `FUNC_GPIOxx_*`）| 「这个脚**原生**是什么？」|
+| **② GPIO Matrix**（交换矩阵）| 外设信号**可路由到任意脚** | **技术参考手册** 第 6 章「IO MUX and GPIO Matrix」的 Table 6-1（输入）/ 6-2（输出）；SDK 里是 `components/soc/esp32s3/include/soc/gpio_sig_map.h`（看 `xxx_IN_IDX` / `xxx_OUT_IDX`）| 「这个外设**能不能**接到某个脚？」|
+
+**★ 决定性判据（哪些能过矩阵）**
+
+| 外设类别 | 能否过 GPIO Matrix | 引脚自由度 |
+|---|---|---|
+| **UART · I2C · I2S · SPI2/3 · LEDC · TWAI · RMT · 脉冲计数** | ✅ **能** | **几乎任意 GPIO** |
+| **ADC · 触摸** | ❌ **不能** | **只能用它自己的固定通道脚**：`ADC1` = `GPIO1~10`、`ADC2` = `GPIO11~20` |
+| **USB** | ❌ 不能 | **固定 `GPIO19` / `20`** |
+| **SPI0/1（Flash / PSRAM）** | ❌ 不能 | 模组内部 |
+
+**★ 落到本板的四个实例**
+
+| 用法 | 归类 | 依据 |
+|---|---|---|
+| **`GPIO3` → UART1 RX** | **矩阵** | IO_MUX 表里 `FUNC_GPIO3_*` 只有 GPIO（**所以你找不到 UART**）；但 `gpio_sig_map.h` 有 **`U1RXD_IN_IDX = 15`** ⇒ 靠矩阵接过去 |
+| **`GPIO15` → LEDC** | **矩阵** | LEDC 属可路由外设 |
+| **`GPIO1` / `2` / `8` → ADC** | ★ **必须靠 IO_MUX（不能过矩阵）** | ⇒ 这三个脚**必须恰好是 ADC1 通道**，它们正是 CH0 / CH1 / CH7。**这也正是"为放 3 路 ADC 而必须搬走 2 个功能"的根本原因** |
+| **`GPIO9~14` → SPI** | **IO_MUX 原生** | `FSPICLK` / `FSPIQ` / `FSPID` / `FSPICS0` ⇒ **额外好处：不受"矩阵路由 SPI 只能 80 MHz"的限制** |
+
+**★ 一句话记住**：**"表里没写" ≠ "不能用"** —— 先看它是不是"可过矩阵的外设"（UART / I2C / I2S / SPI2 / LEDC…），是的话**任意脚都能用**；**只有 ADC / 触摸 / USB 必须用它的固定脚**。
+
+**★ 在 ESP-IDF 里怎么落地**
+
+| 外设 | 写法 | 谁在配矩阵 |
+|---|---|---|
+| UART | `uart_set_pin(UART_NUM_1, tx, rx, rts, cts)` | 函数内部 |
+| I2C | 建总线时传 `sda_io_num` / `scl_io_num`（或 `i2c_set_pin()`）| 驱动内部 |
+| LEDC | `ledc_channel_config()` 里的 `gpio_num` | 驱动内部 |
+| I2S | `i2s_std_gpio_config_t` 里逐脚指定 | 驱动内部 |
+| **ADC** | `adc_oneshot_chan_cfg()` 里给的是**通道号**（`ADC_CHANNEL_n`），**不是 GPIO 号** | ❌ **无矩阵可走** |
 
 ---
 
