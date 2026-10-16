@@ -315,7 +315,7 @@
     <line x1="60" y1="145" x2="150" y2="145" stroke="#f7768e" stroke-width="2"/>
     <rect x="150" y="125" width="80" height="40" fill="none" stroke="#bb9af7" stroke-width="1.5"/>
     <text x="190" y="143" fill="#bb9af7" font-size="12.5" text-anchor="middle">FB1</text>
-    <text x="190" y="160" fill="#565f89" font-size="10" text-anchor="middle">磁珠 ≥500mA</text>
+    <text x="190" y="160" fill="#565f89" font-size="10" text-anchor="middle">600Ω@100MHz</text>
     <line x1="230" y1="145" x2="300" y2="145" stroke="#f7768e" stroke-width="2"/>
     <circle cx="265" cy="145" r="3.5" fill="#f7768e"/>
     <circle cx="285" cy="145" r="3.5" fill="#f7768e"/>
@@ -416,11 +416,13 @@
   </svg>
   <table>
     <tr><th>项</th><th>接法</th></tr>
-    <tr><td><code>U19</code> LP5907（C80670，新放）</td><td><code>5V_SYS</code> → <code>FB1</code> 磁珠(≥500mA) → <code>C76</code> 4.7µF → <code>IN(1)</code>；<code>OUT(5)</code> → <code>C77</code> 1µF → <code>3V3_AUDIO</code>；<code>EN(3)</code>←IN；<code>GND(2)</code>→GND</td></tr>
+    <tr><td><code>U19</code> LP5907（C80670，新放）</td><td><code>5V_SYS</code> → <code>FB1</code> 磁珠（<b>PZ3216D601-2R0TF</b> · C317634）→ <code>C76</code> 4.7µF → <code>IN(1)</code>；<code>OUT(5)</code> → <code>C77</code> 1µF → <code>3V3_AUDIO</code>；<code>EN(3)</code>←IN；<code>GND(2)</code>→GND</td></tr>
     <tr><td><b>改挂 3V3_AUDIO</b></td><td><code>U14.1/8/17/20</code>（CPVDD/AVDD/XSMT/DVDD）、<code>U4.17</code>：<span class="k">从 3V3 断开 → 接 3V3_AUDIO 旗标</span>；<b>其就近去耦电容一并跟改</b></td></tr>
-    <tr><td>功放供电</td><td><code>U16.6</code>：<span class="k">从 5V_SYS 断开 → 经 <code>FB2</code> 磁珠（600Ω@100MHz · DCR≤0.05Ω · ≥1.5A）→ U16.6</span>；<code>C47</code>(10µF)/<code>C48</code>(100nF) 跟到磁珠后（贴 U16.6）</td></tr>
+    <tr><td>功放供电</td><td><code>U16.6</code>：<span class="k">从 5V_SYS 断开 → 经 <code>FB2</code> 磁珠（<b>PZ3216D601-2R0TF</b> · 顺络 · 600Ω@100MHz · 2A · DCR 70mΩ）→ U16.6</span>；<code>C47</code>(10µF)/<code>C48</code>(100nF) 跟到磁珠后（贴 U16.6）</td></tr>
     <tr><td><code>C78</code> 100µF/16V（APXK160ARA101MF611，新）</td><td><code>5V_SYS</code> → GND（体电容）</td></tr>
+    <tr><td><code>FB1</code>/<code>FB2</code> 磁珠（新）</td><td><b>PZ3216D601-2R0TF</b>（顺络 · <b>C317634</b>）· 600Ω@100MHz · ±25% · <b>2A</b> · DCR 70mΩ · 1206 · 现货 6 万+（¥0.37@10+）· <b>两颗同型号</b></td></tr>
   </table>
+  <div class="note"><b>磁珠已于 2026-10-16 选定</b>：PZ3216D601-2R0TF（顺络 C317634）。原口径"DCR≤0.05 Ω"系拍脑袋值——市场 600 Ω/≥1.5 A 大电流档最优即 70 mΩ（影响 &lt;2%，已修正）。备选：村田 <b>BLM31PG601SN1L</b>（C16902 · 1.5A · 80mΩ · ¥0.64）。</div>
 </div>
 
 <!-- ===================== 位号 ===================== -->
@@ -431,7 +433,7 @@
     <tr><td>软启动</td><td><code>R30</code> <code>R31</code> <code>C60</code>（既定名，直接可用）</td></tr>
     <tr><td>三路 ADC</td><td><code>R44</code>~<code>R47</code> · <code>C67</code>~<code>C69</code></td></tr>
     <tr><td>buck</td><td><code>U18</code> · <code>L4</code> · <code>C70</code>~<code>C75</code> · <code>R48</code> <code>R49</code></td></tr>
-    <tr><td>音频轨</td><td><code>U19</code> · <code>FB1</code> <code>FB2</code> · <code>C76</code>~<code>C78</code></td></tr>
+    <tr><td>音频轨</td><td><code>U19</code> · <code>FB1</code> <code>FB2</code>（<b>PZ3216D601-2R0TF</b> · C317634）· <code>C76</code>~<code>C78</code></td></tr>
   </table>
   <div class="note">放置时可直接命名；如果放完是自动乱号，告诉我，我一次性统一核对/改号（像 R19~R24 那样）。</div>
 </div>
