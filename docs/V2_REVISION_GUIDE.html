@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V2 原理图 · 下一批改动（电源区）— 2026-10-16</title>
+<style>
+  :root{
+    --bg:#1a1b26; --card:#1f2335; --card2:#24283b; --line:#3b4261;
+    --tx:#c0caf5; --tx2:#a9b1d6; --dim:#565f89;
+    --blue:#7aa2f7; --green:#9ece6a; --red:#f7768e; --yellow:#e0af68; --teal:#7dcfff; --purple:#bb9af7;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:28px 20px 60px;background:var(--bg);color:var(--tx);
+       font:15px/1.65 "Microsoft YaHei","PingFang SC",system-ui,sans-serif;}
+  .wrap{max-width:980px;margin:0 auto}
+  h1{font-size:24px;margin:0 0 6px;color:#fff}
+  .sub{color:var(--dim);margin-bottom:22px;font-size:13px}
+  h2{font-size:18px;margin:34px 0 10px;padding-left:10px;border-left:4px solid var(--blue);color:#fff}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:12px 0}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin:8px 0}
+  th{text-align:left;color:var(--teal);font-weight:600;border-bottom:1px solid var(--line);padding:6px 8px;white-space:nowrap}
+  td{border-bottom:1px solid #2a2f45;padding:6px 8px;vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  code{background:#16161e;border:1px solid #2a2f45;border-radius:4px;padding:1px 6px;color:var(--green);font-family:Consolas,monospace;font-size:13px}
+  .k{color:var(--red);font-weight:700}
+  .note{background:#1d2030;border-left:3px solid var(--yellow);padding:8px 12px;border-radius:0 6px 6px 0;color:var(--tx2);font-size:13px;margin:10px 0}
+  .note b{color:var(--yellow)}
+  .ok{color:var(--green)} .bad{color:var(--red)}
+  svg{display:block;margin:10px auto;max-width:100%}
+  .order li{margin:3px 0}
+  .foot{color:var(--dim);font-size:12.5px;margin-top:40px;border-top:1px solid var(--line);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>V2 原理图 · 下一批改动（电源区）</h1>
+<div class="sub">2026-10-16 · 基于活体画布核对（174 组件 / 84 网）· 已完成的：U2/L3/C4/C5/C6 删除 ✓、U15.8→3V3_AUDIO ✓、R19~R24=47k ✓</div>
+
+<div class="note"><b>建议操作顺序：</b> B 改名 → A 删除 → H（BT_TXD）→ C 软启动 → D 三路 ADC → E buck → F 音频轨。每步完成后 Ctrl+S。</div>
+
+<!-- ===================== B ===================== -->
+<h2>B. 网名改造：<code>VBAT</code> → <code>5V_SYS</code></h2>
+<div class="card">
+  <p>把画布上所有 <code>VBAT</code> 旗标文字改成 <code>5V_SYS</code>。<b>改名后自动与现有 5V_SYS 网合并</b>（无需其他操作）。</p>
+  <table>
+    <tr><th>此前的 VBAT 成员（4 个）</th><th>归宿</th></tr>
+    <tr><td><code>Q2.2</code>（S 脚）</td><td>下一步 C 中改接 <code>VBUS_USB</code>（临时挂在 5V_SYS 上无碍）</td></tr>
+    <tr><td><code>C47.2</code> · <code>C48.1</code></td><td>F 中随 U16.6 移到磁珠后</td></tr>
+    <tr><td><code>U16.6</code></td><td>F 中改经磁珠接 5V_SYS</td></tr>
+  </table>
+  <p>现有 <code>5V_SYS</code> 成员：<code>C10.2</code> + <code>U3.1</code>(背光LDO IN) + <code>U3.3</code>(EN) —— 改名后统一为一个网。</p>
+</div>
+
+<!-- ===================== A ===================== -->
+<h2>A. 删除（2 件）</h2>
+<div class="card">
+  <table>
+    <tr><th>删什么</th><th>说明</th></tr>
+    <tr><td><code>D2</code>（SS34）</td><td>VBUS_USB ↔ 5V_OR 的 OR 管——V2 无 OR 路径。删除后 <code>5V_OR</code> 网消失（<code>D7</code> TVS <b>保留</b>）</td></tr>
+    <tr><td><code>SW4</code>（用户键）</td><td>腾出 <code>GPIO16</code>，删完接着做 H</td></tr>
+  </table>
+</div>
+
+<!-- ===================== H ===================== -->
+<h2>H. <code>BT_TXD</code> 接入 <code>GPIO16</code>（删 SW4 之后做）</h2>
+<div class="card">
+  <svg viewBox="0 0 660 110">
+    <defs></defs>
+    <rect x="20" y="30" width="120" height="50" rx="6" fill="none" stroke="#c0caf5" stroke-width="1.5"/>
+    <text x="80" y="50" fill="#c0caf5" font-size="13" text-anchor="middle">U4 蓝牙模组</text>
+    <text x="80" y="68" fill="#9ece6a" font-size="12" text-anchor="middle">22 = TXD</text>
+    <line x1="140" y1="55" x2="490" y2="55" stroke="#7aa2f7" stroke-width="2"/>
+    <text x="315" y="45" fill="#7dcfff" font-size="13" text-anchor="middle">BT_TXD</text>
+    <rect x="490" y="30" width="150" height="50" rx="6" fill="none" stroke="#c0caf5" stroke-width="1.5"/>
+    <text x="565" y="50" fill="#c0caf5" font-size="13" text-anchor="middle">ESP32 (U1)</text>
+    <text x="565" y="68" fill="#9ece6a" font-size="12" text-anchor="middle">9 = GPIO16</text>
+    <circle cx="490" cy="55" r="3.5" fill="#7aa2f7"/>
+    <text x="320" y="90" fill="#565f89" font-size="12" text-anchor="middle">删 SW4 后 GPIO16 网只剩 U1.9 ⇒ 把 BT_TXD 标签复制到 U1.9（或用导线连过去）</text>
+  </svg>
+  <div class="note"><b>固件已同步：</b> <code>uart_set_pin(UART_NUM_1, 42, 16, …)</code>（RX=GPIO42 / TX=GPIO16）</div>
+</div>
+
+<!-- ===================== C ===================== -->
+<h2>C. 软启动（Q2 重画 + 3 件）</h2>
+<div class="card">
+  <svg viewBox="0 0 660 250">
+    <!-- VBUS 竖线 -->
+    <text x="30" y="60" fill="#f7768e" font-size="14" font-weight="700">VBUS_USB</text>
+    <line x1="110" y1="60" x2="118" y2="60" stroke="#f7768e" stroke-width="2"/>
+    <line x1="118" y1="60" x2="560" y2="60" stroke="#f7768e" stroke-width="2"/>
+    <!-- Q2 -->
+    <rect x="440" y="95" width="140" height="72" rx="6" fill="none" stroke="#c0caf5" stroke-width="1.5"/>
+    <text x="510" y="120" fill="#c0caf5" font-size="13" text-anchor="middle">Q2  PMOS</text>
+    <text x="510" y="138" fill="#a9b1d6" font-size="11.5" text-anchor="middle">AO3401A · SOT-23</text>
+    <text x="510" y="156" fill="#9ece6a" font-size="11.5" text-anchor="middle">1=G · 2=S · 3=D</text>
+    <!-- S 接 VBUS -->
+    <line x1="490" y1="60" x2="490" y2="95" stroke="#f7768e" stroke-width="2"/>
+    <text x="500" y="88" fill="#7dcfff" font-size="12">S(2)</text>
+    <!-- D 接 5V_SYS -->
+    <line x1="580" y1="131" x2="620" y2="131" stroke="#f7768e" stroke-width="2"/>
+    <text x="600" y="120" fill="#f7768e" font-size="14" font-weight="700">5V_SYS</text>
+    <text x="588" y="150" fill="#7dcfff" font-size="12">D(3)</text>
+    <!-- R30 -->
+    <line x1="240" y1="60" x2="240" y2="90" stroke="#7aa2f7" stroke-width="2"/>
+    <rect x="224" y="90" width="32" height="46" fill="none" stroke="#c0caf5" stroke-width="1.5"/>
+    <text x="278" y="110" fill="#9ece6a" font-size="12.5">R30  100k</text>
+    <!-- C60 跨 G-S -->
+    <line x1="360" y1="60" x2="360" y2="96" stroke="#7aa2f7" stroke-width="2"/>
+    <line x1="350" y1="96" x2="370" y2="96" stroke="#c0caf5" stroke-width="2"/>
+    <line x1="350" y1="106" x2="370" y2="106" stroke="#c0caf5" stroke-width="2"/>
+    <line x1="360" y1="106" x2="360" y2="170" stroke="#7aa2f7" stroke-width="2"/>
+    <text x="378" y="105" fill="#e0af68" font-size="12.5" font-weight="700">C60  100nF ★跨G-S</text>
+    <!-- G 节点横线 -->
+    <line x1="240" y1="136" x2="440" y2="136" stroke="#7aa2f7" stroke-width="2"/>
+    <text x="440" y="128" fill="#7dcfff" font-size="12">G(1)</text>
+    <circle cx="240" cy="136" r="3.5" fill="#7aa2f7"/>
+    <circle cx="360" cy="136" r="3.5" fill="#7aa2f7"/>
+    <!-- R31 -->
+    <line x1="240" y1="136" x2="240" y2="160" stroke="#7aa2f7" stroke-width="2"/>
+    <rect x="224" y="160" width="32" height="46" fill="none" stroke="#c0caf5" stroke-width="1.5"/>
+    <text x="278" y="180" fill="#9ece6a" font-size="12.5">R31  10k</text>
+    <line x1="240" y1="206" x2="240" y2="226" stroke="#7aa2f7" stroke-width="2"/>
+    <line x1="226" y1="226" x2="254" y2="226" stroke="#565f89" stroke-width="2.5"/>
+    <line x1="232" y1="232" x2="248" y2="232" stroke="#565f89" stroke-width="2.5"/>
+    <line x1="238" y1="238" x2="242" y2="238" stroke="#565f89" stroke-width="2.5"/>
+  </svg>
+  <table>
+    <tr><th>项</th><th>接法</th></tr>
+    <tr><td><code>Q2.S(2)</code></td><td class="k">从 5V_SYS（原 VBAT）断开 → 改接 <code>VBUS_USB</code></td></tr>
+    <tr><td><code>Q2.D(3)</code></td><td class="k">从 <code>$1N536</code>（孤立网，删掉）断开 → 改接 <code>5V_SYS</code></td></tr>
+    <tr><td><code>R30</code> 100k（新放）</td><td><code>VBUS_USB</code> → <code>Q2.G(1)</code></td></tr>
+    <tr><td><code>C60</code> 100nF（新放）</td><td><b><code>Q2.G(1)</code> ↔ <code>VBUS_USB</code>（跨栅-源）</b>——<span class="bad">绝不能接成 G→GND（那样上电即全开、无软启动）</span></td></tr>
+    <tr><td><code>R31</code> 10k（新放）</td><td><code>Q2.G(1)</code> → <code>GND</code></td></tr>
+  </table>
+  <div class="note">机理：上电瞬间 C60 把 G 拉到与 S 同电位（Vgs≈0，管关断）→ 再经 R30/R31 缓慢拉开 ⇒ <b>缓启动、抑制 USB 插拔浪涌</b>。Q2.G 现在悬空，接上三个新件即可。</div>
+</div>
+
+<!-- ===================== D ===================== -->
+<h2>D. 三路 ADC（画在 Type-C 输入口区）</h2>
+<div class="card">
+  <svg viewBox="0 0 660 300">
+    <!-- VBUS 支路 -->
+    <text x="30" y="50" fill="#f7768e" font-size="13.5" font-weight="700">VBUS_USB</text>
+    <line x1="112" y1="46" x2="180" y2="46" stroke="#f7768e" stroke-width="2"/>
+    <rect x="180" y="30" width="52" height="32" fill="none" stroke="#c0caf5" stroke-width="1.5"/>
+    <text x="206" y="50" fill="#9ece6a" font-size="12" text-anchor="middle">R44 100k</text>
+    <line x1="232" y1="46" x2="330" y2="46" stroke="#7aa2f7" stroke-width="2"/>
+    <circle cx="268" cy="46" r="3.5" fill="#7aa2f7"/>
+    <text x="338" y="41" fill="#7dcfff" font-size="13" font-weight="700">→  GPIO1</text>
+    <line x1="268" y1="46" x2="268" y2="86" stroke="#7aa2f7" stroke-width="2"/>
+    <rect x="244" y="86" width="48" height="30" fill="none" stroke="#c0caf5" stroke-width="1.5"/>
+    <text x="268" y="105" fill="#9ece6a" font-size="11.5" text-anchor="middle">R45 33k</text>
+    <line x1="268" y1="116" x2="268" y2="140" stroke="#7aa2f7" stroke-width="2"/>
+    <line x1="256" y1="140" x2="280" y2="140" stroke="#565f89" stroke-width="2.5"/>
+    <line x1="260" y1="146" x2="276" y2="146" stroke="#565f89" stroke-width="2.5"/>
+    <line x1="264" y1="152" x2="272" y2="152" stroke="#565f89" stroke-width="2.5"/>
+    <!-- C67 -->
+    <line x1="268" y1="46" x2="420" y2="46" stroke="none"/>
+    <line x1="360" y1="46" x2="360" y2="80" stroke="#7aa2f7" stroke-width="2"/>
+    <circle cx="360" cy="46" r="3.5" fill="#7aa2f7"/>
+    <line x1="350" y1="80" x2="370" y2="80" stroke="#c0caf5" stroke-width="2"/>
+    <line x1="350" y1="90" x2="370" y2="90" stroke="#c0caf5" stroke-width="2"/>
+    <line x1="360" y1="90" x2="360" y2="110" stroke="#7aa2f7" stroke-width="2"/>
+    <line x1="348" y1="110" x2="372" y2="110" stroke="#565f89" stroke-width="2.5"/>
+    <line x1="352" y1="116" x2="368" y2="116" stroke="#565f89" stroke-width="2.5"/>
+    <text x="378" y="86" fill="#9ece6a" font-size="12">C67 100nF</text>
+    <!-- 注释：分压比 -->
+    <text x="500" y="40" fill="#e0af68" font-size="12">5V → 1.24V</text>
+    <text x="500" y="58" fill="#e0af68" font-size="12">12V误插 → 2.98V &lt; 3.3V ✓</text>
+    <!-- CC1 支路 -->
+    <text x="30" y="180" fill="#7dcfff" font-size="13.5" font-weight="700">CC1（$1N375）</text>
+    <line x1="150" y1="176" x2="200" y2="176" stroke="#7dcfff" stroke-width="2"/>
+    <rect x="200" y="160" width="46" height="32" fill="none" stroke="#c0caf5" stroke-width="1.5"/>
+    <text x="223" y="180" fill="#9ece6a" font-size="11.5" text-anchor="middle">R46 1k</text>
+    <line x1="246" y1="176" x2="330" y2="176" stroke="#7aa2f7" stroke-width="2"/>
+    <text x="338" y="181" fill="#7dcfff" font-size="13" font-weight="700">→  GPIO2</text>
+    <circle cx="286" cy="176" r="3.5" fill="#7aa2f7"/>
+    <line x1="286" y1="176" x2="286" y2="212" stroke="#7aa2f7" stroke-width="2"/>
+    <line x1="276" y1="212" x2="296" y2="212" stroke="#c0caf5" stroke-width="2"/>
+    <line x1="276" y1="222" x2="296" y2="222" stroke="#c0caf5" stroke-width="2"/>
+    <line x1="286" y1="222" x2="286" y2="240" stroke="#7aa2f7" stroke-width="2"/>
+    <line x1="274" y1="240" x2="298" y2="240" stroke="#565f89" stroke-width="2.5"/>
+    <line x1="278" y1="246" x2="294" y2="246" stroke="#565f89" stroke-width="2.5"/>
+    <text x="304" y="220" fill="#9ece6a" font-size="12">C68 100nF</text>
+    <text x="420" y="176" fill="#565f89" font-size="12">（$1N375 建议改名 CC1）</text>
+    <!-- CC2 支路 -->
+    <text x="30" y="275" fill="#7dcfff" font-size="13.5" font-weight="700">CC2（$1N374）</text>
+    <line x1="150" y1="271" x2="200" y2="271" stroke="#7dcfff" stroke-width="2"/>
+    <rect x="200" y="255" width="46" height="32" fill="none" stroke="#c0caf5" stroke-width="1.5"/>
+    <text x="223" y="275" fill="#9ece6a" font-size="11.5" text-anchor="middle">R47 1k</text>
+    <line x1="246" y1="271" x2="330" y2="271" stroke="#7aa2f7" stroke-width="2"/>
+    <text x="338" y="276" fill="#7dcfff" font-size="13" font-weight="700">→  GPIO8</text>
+    <text x="304" y="295" fill="#9ece6a" font-size="12">C69 100nF → GND</text>
+    <text x="420" y="271" fill="#565f89" font-size="12">（$1N374 建议改名 CC2）</text>
+  </svg>
+  <div class="note">现状核对：<code>GPIO1</code>/<code>GPIO2</code>/<code>GPIO8</code> 目前都只连着 ESP32 脚（干净、待接）✓。CC1/CC2 节点取 <code>J4.A5 + R8.2</code> / <code>J4.B5 + R9.2</code> 处。</div>
+</div>
+
+<!-- ===================== E ===================== -->
+<h2>E. buck 主电路（U18 = LMR50410XFDBVR · C5219371）</h2>
+<div class="card">
+  <svg viewBox="0 0 660 290">
+    <!-- IC 框 -->
+    <rect x="230" y="90" width="200" height="120" rx="6" fill="none" stroke="#c0caf5" stroke-width="1.5"/>
+    <text x="330" y="120" fill="#c0caf5" font-size="14" text-anchor="middle">U18  LMR50410</text>
+    <text x="330" y="138" fill="#a9b1d6" font-size="11.5" text-anchor="middle">SOT-23-6 · 丝印 4AXF</text>
+    <!-- 左引脚 -->
+    <text x="222" y="162" fill="#7dcfff" font-size="12" text-anchor="end">VIN(5)</text>
+    <line x1="230" y1="158" x2="150" y2="158" stroke="#f7768e" stroke-width="2"/>
+    <text x="222" y="196" fill="#7dcfff" font-size="12" text-anchor="end">EN(4)</text>
+    <line x1="230" y1="192" x2="150" y2="192" stroke="#f7768e" stroke-width="2"/>
+    <text x="150" y="150" fill="#f7768e" font-size="13.5" font-weight="700" text-anchor="middle">5V_SYS</text>
+    <circle cx="150" cy="158" r="3.5" fill="#f7768e"/>
+    <circle cx="150" cy="192" r="3.5" fill="#f7768e"/>
+    <!-- 输入电容 -->
+    <line x1="150" y1="158" x2="90" y2="158" stroke="#f7768e" stroke-width="2"/>
+    <line x1="90" y1="158" x2="90" y2="126" stroke="#f7768e" stroke-width="2"/>
+    <line x1="80" y1="126" x2="100" y2="126" stroke="#c0caf5" stroke-width="2"/>
+    <line x1="80" y1="116" x2="100" y2="116" stroke="#c0caf5" stroke-width="2"/>
+    <line x1="90" y1="116" x2="90" y2="100" stroke="#f7768e" stroke-width="2"/>
+    <text x="42" y="105" fill="#9ece6a" font-size="11.5">C71 10µF</text>
+    <text x="42" y="122" fill="#9ece6a" font-size="11.5">C72 100nF</text>
+    <text x="42" y="139" fill="#565f89" font-size="11.5">（贴脚放）</text>
+    <line x1="90" y1="158" x2="90" y2="182" stroke="#f7768e" stroke-width="2"/>
+    <line x1="78" y1="182" x2="102" y2="182" stroke="#565f89" stroke-width="2.5"/>
+    <line x1="82" y1="188" x2="98" y2="188" stroke="#565f89" stroke-width="2.5"/>
+    <!-- 右引脚 -->
+    <text x="438" y="162" fill="#7dcfff" font-size="12">SW(6)</text>
+    <line x1="430" y1="158" x2="520" y2="158" stroke="#7aa2f7" stroke-width="2"/>
+    <text x="438" y="196" fill="#7dcfff" font-size="12">FB(3)</text>
+    <line x1="430" y1="192" x2="560" y2="192" stroke="#7aa2f7" stroke-width="2"/>
+    <!-- Cboot 跨 CB-SW -->
+    <text x="222" y="230" fill="#7dcfff" font-size="12" text-anchor="end">CB(1)</text>
+    <line x1="230" y1="226" x2="330" y2="226" stroke="#7aa2f7" stroke-width="2"/>
+    <line x1="330" y1="226" x2="330" y2="250" stroke="#7aa2f7" stroke-width="2"/>
+    <line x1="320" y1="250" x2="340" y2="250" stroke="#c0caf5" stroke-width="2"/>
+    <line x1="320" y1="260" x2="340" y2="260" stroke="#c0caf5" stroke-width="2"/>
+    <line x1="330" y1="260" x2="330" y2="278" stroke="#7aa2f7" stroke-width="2"/>
+    <text x="348" y="248" fill="#e0af68" font-size="12">C70 100nF（CB↔SW）</text>
+    <!-- GND 脚 -->
+    <text x="330" y="232" fill="#565f89" font-size="11" text-anchor="middle">2 = GND</text>
+    <!-- L4 -->
+    <rect x="520" y="142" width="52" height="32" fill="none" stroke="#c0caf5" stroke-width="1.5"/>
+    <text x="546" y="162" fill="#9ece6a" font-size="11.5" text-anchor="middle">L4 10µH</text>
+    <line x1="572" y1="158" x2="625" y2="158" stroke="#7aa2f7" stroke-width="2"/>
+    <text x="630" y="163" fill="#9ece6a" font-size="14" font-weight="700">3V3</text>
+    <!-- 输出电容 -->
+    <line x1="600" y1="158" x2="600" y2="196" stroke="#7aa2f7" stroke-width="2"/>
+    <line x1="588" y1="204" x2="612" y2="204" stroke="#c0caf5" stroke-width="2"/>
+    <line x1="588" y1="214" x2="612" y2="214" stroke="#c0caf5" stroke-width="2"/>
+    <line x1="600" y1="214" x2="600" y2="232" stroke="#7aa2f7" stroke-width="2"/>
+    <line x1="588" y1="232" x2="612" y2="232" stroke="#565f89" stroke-width="2.5"/>
+    <line x1="592" y1="238" x2="608" y2="238" stroke="#565f89" stroke-width="2.5"/>
+    <text x="532" y="212" fill="#9ece6a" font-size="11.5" text-anchor="end">C73 22µF</text>
+    <text x="532" y="228" fill="#9ece6a" font-size="11.5" text-anchor="end">C74 22µF</text>
+    <!-- FB 分压 -->
+    <circle cx="600" cy="158" r="3.5" fill="#7aa2f7"/>
+    <text x="470" y="188" fill="#9ece6a" font-size="11.5" text-anchor="end">R48 51k ∥ C75 22pF</text>
+    <text x="470" y="212" fill="#9ece6a" font-size="11.5" text-anchor="end">R49 22.1k</text>
+    <line x1="560" y1="192" x2="560" y2="216" stroke="#7aa2f7" stroke-width="2"/>
+    <line x1="560" y1="216" x2="560" y2="238" stroke="#7aa2f7" stroke-width="2"/>
+    <line x1="548" y1="238" x2="572" y2="238" stroke="#565f89" stroke-width="2.5"/>
+    <line x1="552" y1="244" x2="568" y2="244" stroke="#565f89" stroke-width="2.5"/>
+    <!-- 连 FB 到 3V3（经 R48） -->
+    <path d="M 560 192 L 600 192" stroke="none"/>
+    <path d="M 600 158 L 600 192" stroke="#7aa2f7" stroke-width="2" stroke-dasharray="4 3"/>
+    <text x="608" y="180" fill="#565f89" font-size="11">R48/C75 上端接 3V3</text>
+  </svg>
+  <table>
+    <tr><th>外围</th><th>接法</th></tr>
+    <tr><td><code>C70</code> 100nF（新）</td><td><code>CB(1)</code> ↔ <code>SW(6)</code></td></tr>
+    <tr><td><code>C71</code> 10µF ＋ <code>C72</code> 100nF（新）</td><td><code>5V_SYS</code> → <code>VIN(5)</code>，紧靠 + 另一端 GND</td></tr>
+    <tr><td><code>EN(4)</code></td><td>接 <code>5V_SYS</code>（与 VIN 同点——常开，<b>勿悬空</b>）</td></tr>
+    <tr><td><code>L4</code> 10µH（SWPA5045S100MT，新）</td><td><code>SW(6)</code> → <code>3V3</code></td></tr>
+    <tr><td><code>C73</code>/<code>C74</code> 22µF ×2（新）</td><td><code>3V3</code> → GND　<span class="bad">（原计划复用 C7~C9 —— 已删，按新件放）</span></td></tr>
+    <tr><td><code>R48</code> 51k 1% ∥ <code>C75</code> 22pF(C0G)（新）</td><td><code>3V3</code> → <code>FB(3)</code></td></tr>
+    <tr><td><code>R49</code> 22.1k 1%（新）</td><td><code>FB(3)</code> → GND</td></tr>
+  </table>
+  <div class="note">输出 = 1.0V × (1 + 51k/22.1k) = <b>3.308V</b> ✓。到货验丝印 <code>4AXF</code>（= FPWM 版）。</div>
+</div>
+
+<!-- ===================== F ===================== -->
+<h2>F. 音频轨（3V3_AUDIO）+ 功放供电</h2>
+<div class="card">
+  <svg viewBox="0 0 660 230">
+    <!-- LDO -->
+    <rect x="230" y="60" width="180" height="80" rx="6" fill="none" stroke="#c0caf5" stroke-width="1.5"/>
+    <text x="320" y="90" fill="#c0caf5" font-size="13.5" text-anchor="middle">U19  LP5907-3.3</text>
+    <text x="320" y="110" fill="#a9b1d6" font-size="11.5" text-anchor="middle">C80670 · SOT-23-5</text>
+    <text x="320" y="128" fill="#9ece6a" font-size="11" text-anchor="middle">1=IN · 2=GND · 3=EN · 5=OUT</text>
+    <!-- 输入 -->
+    <text x="30" y="52" fill="#f7768e" font-size="13.5" font-weight="700">5V_SYS</text>
+    <line x1="112" y1="48" x2="150" y2="48" stroke="#f7768e" stroke-width="2"/>
+    <rect x="150" y="38" width="60" height="22" fill="none" stroke="#bb9af7" stroke-width="1.5"/>
+    <text x="180" y="54" fill="#bb9af7" font-size="11.5" text-anchor="middle">FB1 磁珠</text>
+    <line x1="210" y1="48" x2="230" y2="48" stroke="#f7768e" stroke-width="2"/>
+    <line x1="230" y1="48" x2="230" y2="100" stroke="#f7768e" stroke-width="2"/>
+    <text x="222" y="102" fill="#7dcfff" font-size="12" text-anchor="end">IN(1)</text>
+    <circle cx="180" cy="48" r="0"/>
+    <!-- C76 -->
+    <circle cx="180" cy="48" r="0"/>
+    <line x1="180" y1="60" x2="180" y2="60" stroke="none"/>
+    <line x1="196" y1="48" x2="196" y2="72" stroke="#7aa2f7" stroke-width="2"/>
+    <circle cx="196" cy="48" r="3.5" fill="#7aa2f7" opacity="0"/>
+    <line x1="186" y1="72" x2="206" y2="72" stroke="#c0caf5" stroke-width="2"/>
+    <line x1="186" y1="82" x2="206" y2="82" stroke="#c0caf5" stroke-width="2"/>
+    <line x1="196" y1="82" x2="196" y2="102" stroke="#7aa2f7" stroke-width="2"/>
+    <line x1="184" y1="102" x2="208" y2="102" stroke="#565f89" stroke-width="2.5"/>
+    <line x1="188" y1="108" x2="204" y2="108" stroke="#565f89" stroke-width="2.5"/>
+    <text x="214" y="80" fill="#9ece6a" font-size="11.5" text-anchor="end">C76 4.7µF</text>
+    <!-- EN -->
+    <line x1="230" y1="124" x2="196" y2="124" stroke="#f7768e" stroke-width="2"/>
+    <line x1="196" y1="124" x2="196" y2="48" stroke="#f7768e" stroke-width="1.5" stroke-dasharray="4 3"/>
+    <text x="222" y="128" fill="#7dcfff" font-size="12" text-anchor="end">EN(3)←IN</text>
+    <!-- 输出 -->
+    <line x1="410" y1="100" x2="440" y2="100" stroke="#f7768e" stroke-width="2"/>
+    <text x="418" y="94" fill="#7dcfff" font-size="12">OUT(5)</text>
+    <circle cx="440" cy="100" r="3.5" fill="#f7768e"/>
+    <line x1="440" y1="100" x2="500" y2="100" stroke="#f7768e" stroke-width="2"/>
+    <line x1="440" y1="100" x2="440" y2="130" stroke="#f7768e" stroke-width="2"/>
+    <line x1="430" y1="130" x2="450" y2="130" stroke="#c0caf5" stroke-width="2"/>
+    <line x1="430" y1="140" x2="450" y2="140" stroke="#c0caf5" stroke-width="2"/>
+    <line x1="440" y1="140" x2="440" y2="160" stroke="#f7768e" stroke-width="2"/>
+    <line x1="428" y1="160" x2="452" y2="160" stroke="#565f89" stroke-width="2.5"/>
+    <line x1="432" y1="166" x2="448" y2="166" stroke="#565f89" stroke-width="2.5"/>
+    <text x="458" y="136" fill="#9ece6a" font-size="11.5">C77 1µF</text>
+    <text x="510" y="105" fill="#9ece6a" font-size="14" font-weight="700">3V3_AUDIO</text>
+    <!-- 改挂说明 -->
+    <text x="40" y="185" fill="#e0af68" font-size="12.5">改挂（从 3V3 断开 → 接 3V3_AUDIO）：U14.1/8/17/20 · U4.17</text>
+    <text x="40" y="205" fill="#e0af68" font-size="12.5">★ 各自"紧邻电源脚"的去耦电容一并跟改（U4 旁 C29/C31；U14 旁 C36/C38/C41/C49 中对应者）</text>
+  </svg>
+  <table>
+    <tr><th>项</th><th>接法</th></tr>
+    <tr><td><code>U19</code> LP5907（C80670，新放）</td><td><code>5V_SYS</code> → <code>FB1</code> 磁珠(≥500mA) → <code>C76</code> 4.7µF → <code>IN(1)</code>；<code>OUT(5)</code> → <code>C77</code> 1µF → <code>3V3_AUDIO</code>；<code>EN(3)</code>←IN；<code>GND(2)</code>→GND</td></tr>
+    <tr><td><b>改挂 3V3_AUDIO</b></td><td><code>U14.1/8/17/20</code>（CPVDD/AVDD/XSMT/DVDD）、<code>U4.17</code>：<span class="k">从 3V3 断开 → 接 3V3_AUDIO 旗标</span>；<b>其就近去耦电容一并跟改</b></td></tr>
+    <tr><td>功放供电</td><td><code>U16.6</code>：<span class="k">从 5V_SYS 断开 → 经 <code>FB2</code> 磁珠（600Ω@100MHz · DCR≤0.05Ω · ≥1.5A）→ U16.6</span>；<code>C47</code>(10µF)/<code>C48</code>(100nF) 跟到磁珠后（贴 U16.6）</td></tr>
+    <tr><td><code>C78</code> 100µF/16V（APXK160ARA101MF611，新）</td><td><code>5V_SYS</code> → GND（体电容）</td></tr>
+  </table>
+</div>
+
+<!-- ===================== 位号 ===================== -->
+<h2>推荐位号（新件）</h2>
+<div class="card">
+  <table>
+    <tr><th>区块</th><th>位号</th></tr>
+    <tr><td>软启动</td><td><code>R30</code> <code>R31</code> <code>C60</code>（既定名，直接可用）</td></tr>
+    <tr><td>三路 ADC</td><td><code>R44</code>~<code>R47</code> · <code>C67</code>~<code>C69</code></td></tr>
+    <tr><td>buck</td><td><code>U18</code> · <code>L4</code> · <code>C70</code>~<code>C75</code> · <code>R48</code> <code>R49</code></td></tr>
+    <tr><td>音频轨</td><td><code>U19</code> · <code>FB1</code> <code>FB2</code> · <code>C76</code>~<code>C78</code></td></tr>
+  </table>
+  <div class="note">放置时可直接命名；如果放完是自动乱号，告诉我，我一次性统一核对/改号（像 R19~R24 那样）。</div>
+</div>
+
+<div class="foot">
+  依据：活体画布（2026-10-16 17:4x）· V2_SCHEMATIC_GUIDE §9.7 / §9.6 ⑨⑩ · NS4150C / LMR50410 / LP5907 / EWM104 / PCM5102A 手册。
+  <br>（本页为施工参照，不改动画布本身；画完一块记得 Ctrl+S 后让我复核。）
+</div>
+
+</div>
+</body>
+</html>
