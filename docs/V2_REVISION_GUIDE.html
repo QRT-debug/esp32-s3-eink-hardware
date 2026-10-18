@@ -36,7 +36,7 @@
 <div class="wrap">
 
 <h1>V2 原理图 · 下一批改动（电源区）</h1>
-<div class="sub">2026-10-16 · 基于活体画布核对（174 组件 / 84 网）· 已完成的：U2/L3/C4/C5/C6 删除 ✓、U15.8→3V3_AUDIO ✓、R19~R24=47k ✓</div>
+<div class="sub">2026-10-16 · 基于活体画布核对（174 组件 / 84 网）· 已完成的：U2/L3/C4/C5/C6 删除 ✓、U15.8→3V3_AUDIO ✓、R19~R24=47k ✓ · <b>2026-10-18 追加 G/I/J/K（收尾项：3.5 mm 座 / 指示灯 / 网名 / 图纸规范）</b></div>
 
 <div class="note"><b>建议操作顺序：</b> B 改名 → A 删除 → H（BT_TXD）→ C 软启动 → D 三路 ADC → E buck → F 音频轨。每步完成后 Ctrl+S。</div>
 
@@ -425,6 +425,207 @@
   <div class="note"><b>磁珠已于 2026-10-16 选定</b>：PZ3216D601-2R0TF（顺络 C317634）。原口径"DCR≤0.05 Ω"系拍脑袋值——市场 600 Ω/≥1.5 A 大电流档最优即 70 mΩ（影响 &lt;2%，已修正）。备选：村田 <b>BLM31PG601SN1L</b>（C16902 · 1.5A · 80mΩ · ¥0.64）。</div>
 </div>
 
+
+<!-- ===================== G ===================== -->
+<h2>G. line-out：3.5 mm 带开关座 +「插入即静音」（模拟链最后一件）</h2>
+<div class="card">
+  <p>活体现状：<code>LINE_OUT</code> 节点已就绪（<code>C62.2</code> + <code>R41.2</code>，现名 <code>$1N631</code>），<b>只差座子</b>。本步一次解决两件事：接出 line-out + 用座子的<b>常闭开关触点</b>实现「插耳机 → 喇叭自动静音」。</p>
+  <svg viewBox="0 0 1000 545">
+    <!-- ===== ① line-out 输出链 ===== -->
+    <text x="26" y="34" fill="#565f89" font-size="13">① line-out 输出链（U17A 及其右侧链条已画好，本步只接座）</text>
+
+    <!-- U17A 跟随器 -->
+    <path d="M 80,110 L 80,190 L 155,150 Z" fill="none" stroke="#c0caf5" stroke-width="1.8"/>
+    <text x="112" y="155" fill="#c0caf5" font-size="12" text-anchor="middle">U17A</text>
+    <line x1="40" y1="175" x2="80" y2="175" stroke="#7aa2f7" stroke-width="2"/>
+    <text x="36" y="172" fill="#7dcfff" font-size="11.5" text-anchor="end">IN+(3)</text>
+    <text x="36" y="194" fill="#565f89" font-size="10.5" text-anchor="end">← 汇合点 $1N647</text>
+    <line x1="40" y1="125" x2="80" y2="125" stroke="#7aa2f7" stroke-width="2"/>
+    <text x="36" y="120" fill="#7dcfff" font-size="11.5" text-anchor="end">IN−(2)</text>
+    <line x1="155" y1="150" x2="200" y2="150" stroke="#7aa2f7" stroke-width="2"/>
+    <text x="160" y="142" fill="#7dcfff" font-size="11.5">OUT(1)</text>
+    <!-- 跟随器短接 -->
+    <line x1="182" y1="150" x2="182" y2="92" stroke="#9ece6a" stroke-width="1.6"/>
+    <line x1="182" y1="92" x2="40" y2="92" stroke="#9ece6a" stroke-width="1.6"/>
+    <line x1="40" y1="92" x2="40" y2="125" stroke="#9ece6a" stroke-width="1.6"/>
+    <circle cx="182" cy="150" r="3" fill="#9ece6a"/>
+    <text x="111" y="86" fill="#9ece6a" font-size="11" text-anchor="middle">跟随器短接（已画）</text>
+
+    <!-- R33 -->
+    <rect x="205" y="139" width="40" height="22" fill="none" stroke="#c0caf5" stroke-width="1.6"/>
+    <line x1="200" y1="150" x2="205" y2="150" stroke="#7aa2f7" stroke-width="2"/>
+    <line x1="245" y1="150" x2="262" y2="150" stroke="#7aa2f7" stroke-width="2"/>
+    <text x="225" y="131" fill="#9ece6a" font-size="12" text-anchor="middle">R33 100Ω</text>
+
+    <!-- C62 极性电容（+ 朝运放侧） -->
+    <line x1="268" y1="136" x2="268" y2="164" stroke="#c0caf5" stroke-width="2.4"/>
+    <path d="M 281,136 Q 289,150 281,164" fill="none" stroke="#c0caf5" stroke-width="2.4"/>
+    <line x1="262" y1="150" x2="268" y2="150" stroke="#7aa2f7" stroke-width="2"/>
+    <line x1="281" y1="150" x2="300" y2="150" stroke="#7aa2f7" stroke-width="2"/>
+    <text x="275" y="184" fill="#9ece6a" font-size="12" text-anchor="middle">C62 100µF</text>
+    <text x="257" y="143" fill="#f7768e" font-size="13" font-weight="700">+</text>
+
+    <!-- LINE_OUT 节点 -->
+    <line x1="300" y1="150" x2="400" y2="150" stroke="#7aa2f7" stroke-width="2"/>
+    <circle cx="330" cy="150" r="3.2" fill="#9ece6a"/>
+    <line x1="330" y1="150" x2="330" y2="124" stroke="#9ece6a" stroke-width="1.4"/>
+    <text x="330" y="116" fill="#9ece6a" font-size="13" font-weight="700" text-anchor="middle">LINE_OUT</text>
+
+    <!-- R41 泄放 100k -->
+    <line x1="330" y1="150" x2="330" y2="168" stroke="#7aa2f7" stroke-width="2"/>
+    <rect x="320" y="168" width="20" height="42" fill="none" stroke="#c0caf5" stroke-width="1.6"/>
+    <line x1="330" y1="210" x2="330" y2="226" stroke="#7aa2f7" stroke-width="2"/>
+    <line x1="314" y1="226" x2="346" y2="226" stroke="#565f89" stroke-width="2.5"/>
+    <line x1="320" y1="232" x2="340" y2="232" stroke="#565f89" stroke-width="2.5"/>
+    <line x1="324" y1="238" x2="336" y2="238" stroke="#565f89" stroke-width="2.5"/>
+    <text x="348" y="196" fill="#9ece6a" font-size="12">R41 100k</text>
+
+    <!-- J9 座（T / R1 / R2 / S） -->
+    <rect x="440" y="60" width="200" height="250" rx="8" fill="none" stroke="#7dcfff" stroke-width="1.8"/>
+    <text x="540" y="86" fill="#7dcfff" font-size="13" font-weight="700" text-anchor="middle">J9  3.5mm 带开关座</text>
+
+    <!-- LINE_OUT → T / R1 -->
+    <line x1="400" y1="150" x2="400" y2="130" stroke="#7aa2f7" stroke-width="2"/>
+    <line x1="400" y1="130" x2="440" y2="130" stroke="#7aa2f7" stroke-width="2"/>
+    <line x1="400" y1="150" x2="415" y2="150" stroke="#7aa2f7" stroke-width="2"/>
+    <line x1="415" y1="150" x2="415" y2="170" stroke="#7aa2f7" stroke-width="2"/>
+    <line x1="415" y1="170" x2="440" y2="170" stroke="#7aa2f7" stroke-width="2"/>
+    <circle cx="400" cy="150" r="3" fill="#7aa2f7"/>
+    <text x="452" y="134" fill="#7dcfff" font-size="12">T</text>
+    <text x="452" y="174" fill="#7dcfff" font-size="12">R1</text>
+    <text x="452" y="234" fill="#7dcfff" font-size="12">R2</text>
+    <text x="452" y="274" fill="#7dcfff" font-size="12">S</text>
+
+    <!-- GND → R2 / S -->
+    <line x1="330" y1="238" x2="380" y2="238" stroke="#565f89" stroke-width="2"/>
+    <line x1="380" y1="238" x2="380" y2="230" stroke="#565f89" stroke-width="2"/>
+    <line x1="380" y1="230" x2="440" y2="230" stroke="#565f89" stroke-width="2"/>
+    <line x1="380" y1="238" x2="380" y2="270" stroke="#565f89" stroke-width="2"/>
+    <line x1="380" y1="270" x2="440" y2="270" stroke="#565f89" stroke-width="2"/>
+    <circle cx="380" cy="238" r="3" fill="#565f89"/>
+
+    <!-- SW-A / SW-B（右侧引出，下半区使用） -->
+    <line x1="640" y1="215" x2="682" y2="215" stroke="#e0af68" stroke-width="2"/>
+    <line x1="640" y1="250" x2="682" y2="250" stroke="#e0af68" stroke-width="2"/>
+    <text x="688" y="219" fill="#e0af68" font-size="11.5">SW-A</text>
+    <text x="688" y="254" fill="#e0af68" font-size="11.5">SW-B</text>
+    <text x="540" y="334" fill="#565f89" font-size="11" text-anchor="middle">未插入：SW-A ↔ SW-B 导通（常闭）｜插入：断开</text>
+
+    <!-- ===== ② 插入即静音（下半区） ===== -->
+    <text x="26" y="352" fill="#565f89" font-size="13">② 插入即静音（新接）—— 用 J9 的常闭开关触点串在功放使能线上（mA 级，不碰喇叭大电流）</text>
+
+    <text x="75" y="398" fill="#9ece6a" font-size="13" font-weight="700" text-anchor="middle">GPIO41</text>
+    <text x="75" y="414" fill="#565f89" font-size="10.5" text-anchor="middle">U1.34</text>
+    <line x1="75" y1="420" x2="75" y2="450" stroke="#9ece6a" stroke-width="2"/>
+    <line x1="75" y1="450" x2="152" y2="450" stroke="#9ece6a" stroke-width="2"/>
+
+    <circle cx="160" cy="450" r="4" fill="#1a1b26" stroke="#e0af68" stroke-width="2"/>
+    <circle cx="222" cy="450" r="4" fill="#1a1b26" stroke="#e0af68" stroke-width="2"/>
+    <line x1="164" y1="450" x2="218" y2="443" stroke="#e0af68" stroke-width="2.2"/>
+    <text x="191" y="480" fill="#e0af68" font-size="11.5" text-anchor="middle">J9 SW（常闭）</text>
+
+    <line x1="226" y1="450" x2="330" y2="450" stroke="#7aa2f7" stroke-width="2"/>
+    <text x="278" y="438" fill="#9ece6a" font-size="12.5" text-anchor="middle">AMP_CTRL（新网）</text>
+    <circle cx="270" cy="450" r="3" fill="#7aa2f7"/>
+
+    <rect x="330" y="430" width="120" height="40" rx="5" fill="none" stroke="#c0caf5" stroke-width="1.6"/>
+    <text x="390" y="454" fill="#7dcfff" font-size="12.5" text-anchor="middle">U16.1 CTRL</text>
+
+    <!-- R26 下拉（必须在 CTRL 侧） -->
+    <line x1="270" y1="450" x2="270" y2="466" stroke="#7aa2f7" stroke-width="2"/>
+    <rect x="260" y="466" width="20" height="38" fill="none" stroke="#c0caf5" stroke-width="1.6"/>
+    <line x1="270" y1="504" x2="270" y2="516" stroke="#7aa2f7" stroke-width="2"/>
+    <line x1="254" y1="516" x2="286" y2="516" stroke="#565f89" stroke-width="2.5"/>
+    <line x1="260" y1="522" x2="280" y2="522" stroke="#565f89" stroke-width="2.5"/>
+    <line x1="264" y1="528" x2="276" y2="528" stroke="#565f89" stroke-width="2.5"/>
+    <text x="288" y="482" fill="#9ece6a" font-size="12">R26 2.2k</text>
+    <text x="288" y="498" fill="#f7768e" font-size="10.5">（R26.2 要挪到 CTRL 侧）</text>
+
+    <!-- 状态说明 -->
+    <text x="500" y="398" fill="#a9b1d6" font-size="12.5">未插入（触点闭合）：CTRL 随 GPIO41 → 固件正常开关功放</text>
+    <text x="500" y="424" fill="#f7768e" font-size="12.5" font-weight="700">插入（触点断开）：CTRL 被 R26 拉低 → 功放 shutdown → 喇叭静音</text>
+    <text x="500" y="450" fill="#565f89" font-size="11.5">改动：GPIO41 网现为 {U1.34, R26.2, U16.1} → 拆出 U16.1 与 R26.2 组成 AMP_CTRL</text>
+    <text x="500" y="472" fill="#565f89" font-size="11.5">SW-A → GPIO41 网；SW-B → AMP_CTRL；其余触点（检测组）悬空</text>
+  </svg>
+  <table>
+    <tr><th>接线项</th><th>接法</th></tr>
+    <tr><td><code>$1N631</code>（<code>C62.2</code> / <code>R41.2</code>）</td><td>→ 座 <b>T</b> 与 <b>R1</b>（双声道同信号）；网名改为 <code>LINE_OUT</code></td></tr>
+    <tr><td>GND</td><td>→ 座 <b>R2</b> 与 <b>S</b>（TRS / TRRS 耳机都兼容）</td></tr>
+    <tr><td><code>U16.1</code>（CTRL）</td><td><span class="k">从 <code>GPIO41</code> 网拆出</span> → 新网 <code>AMP_CTRL</code></td></tr>
+    <tr><td><code>R26.2</code>（2.2 k 下拉）</td><td><span class="k">从 <code>GPIO41</code> 网拆出</span> → 接 <code>AMP_CTRL</code>（另一端 GND 不动）</td></tr>
+    <tr><td>座 <b>SW-A</b></td><td>→ <code>GPIO41</code> 网（<code>U1.34</code> 同节点）</td></tr>
+    <tr><td>座 <b>SW-B</b></td><td>→ <code>AMP_CTRL</code>（<code>U16.1</code> / <code>R26.2</code> 同网）</td></tr>
+  </table>
+  <div class="note"><b>为什么开关触点串 CTRL、不串喇叭线</b>：喇叭 BTL 峰值 ≈1.23 A（3 W / 4 Ω），这类座的开关触点额定只有 0.25~0.5 A ⇒ 串喇叭会长期超载。CTRL 通路只有 mA 级（R26 2.2 k 下拉 = 1.5 mA）⇒ 任何触点都绰绰有余。插入 ⇒ 触点断开 ⇒ CTRL 被 R26 拉低 ⇒ NS4150C <b>shutdown</b> ⇒ 喇叭完全静音（附带省电、无底噪）。</div>
+  <table>
+    <tr><th>候选座</th><th>编号</th><th>关键参数</th><th>价格 / 库存</th><th>评价</th></tr>
+    <tr><td><b>PJ-342E</b>（硕方）</td><td><b>C22355773</b></td><td>3.5 <b>四段 TRRS</b> · <b>常闭式</b> · 250 mA/24 V · SMD 沉板卧式</td><td>¥1.22 / 683</td><td class="ok">★ 主推（唯一明示「常闭」）</td></tr>
+    <tr><td>KH-PJ-325C（金航标）</td><td>C5123138</td><td>TRS 三极 · 带开关 · 插件 14×8.1 mm</td><td>¥1.23 / 1225</td><td>备选（插件好焊；常闭需实物确认）</td></tr>
+    <tr><td>PJ-342C（品赞）</td><td>C2837091</td><td>四级 · 两组开关 · <b>1 A</b>/20 V · SMD 沉板</td><td>¥1.71 / 1615</td><td>触点余量最大（两组开关可留一组备用）</td></tr>
+  </table>
+  <div class="note"><b>到货 30 秒验证</b>：万用表通断档量开关组两脚——<b>未插入应导通</b>（常闭）✓。若相反（常开），告诉我改接法（插入时把 CTRL 经 1 k 拉低）。</div>
+  <div class="note"><b>TRRS 兼容性</b>：T/R1 都接 <code>LINE_OUT</code>、R2/S 都接 GND ⇒ 插普通 TRS 耳机（T=L · R=R · S=GND）✓；插带麦 TRRS 耳机（R2=GND · S=MIC→GND）✓ 麦克风接地无害。</div>
+</div>
+
+<!-- ===================== I ===================== -->
+<h2>I. 电源指示灯（1 件 LED + 1 只电阻）</h2>
+<div class="card">
+  <svg viewBox="0 0 1000 250">
+    <text x="26" y="30" fill="#565f89" font-size="13">5V_SYS 有电即亮（USB 插入 + 软启动完成后）</text>
+    <text x="150" y="68" fill="#f7768e" font-size="14" font-weight="700" text-anchor="middle">5V_SYS</text>
+    <line x1="150" y1="78" x2="150" y2="100" stroke="#f7768e" stroke-width="2"/>
+    <rect x="140" y="100" width="20" height="44" fill="none" stroke="#c0caf5" stroke-width="1.6"/>
+    <line x1="150" y1="144" x2="150" y2="166" stroke="#f7768e" stroke-width="2"/>
+    <text x="172" y="126" fill="#9ece6a" font-size="12.5">R50 1k</text>
+    <text x="128" y="160" fill="#f7768e" font-size="12" text-anchor="end">+</text>
+    <path d="M 132,166 L 168,166 L 150,194 Z" fill="none" stroke="#c0caf5" stroke-width="2"/>
+    <line x1="132" y1="194" x2="168" y2="194" stroke="#c0caf5" stroke-width="2.4"/>
+    <line x1="150" y1="194" x2="150" y2="208" stroke="#7aa2f7" stroke-width="2"/>
+    <line x1="176" y1="162" x2="194" y2="148" stroke="#9ece6a" stroke-width="1.6"/>
+    <line x1="184" y1="172" x2="202" y2="158" stroke="#9ece6a" stroke-width="1.6"/>
+    <text x="196" y="184" fill="#9ece6a" font-size="11.5">D8</text>
+    <line x1="134" y1="208" x2="166" y2="208" stroke="#565f89" stroke-width="2.5"/>
+    <line x1="140" y1="214" x2="160" y2="214" stroke="#565f89" stroke-width="2.5"/>
+    <line x1="144" y1="220" x2="156" y2="220" stroke="#565f89" stroke-width="2.5"/>
+    <text x="300" y="104" fill="#a9b1d6" font-size="12.5">I = (5 − Vf) / R50 ≈ (5 − 3.2) / 1k ≈ 1.8 mA</text>
+    <text x="300" y="128" fill="#a9b1d6" font-size="12.5">C107402 为 330 mcd@5 mA 档 ⇒ 1.8 mA 下约 120 mcd（足够醒目）</text>
+    <text x="300" y="158" fill="#565f89" font-size="11.5">接 5V_SYS：指示「USB 上电 + 软启动完成」（3V3 起得更晚，指代不清）</text>
+    <text x="300" y="182" fill="#565f89" font-size="11.5">极性：LED 正极（+）朝 R50 侧；嫌暗可换 680 Ω（约 2.6 mA）</text>
+  </svg>
+  <table>
+    <tr><th>器件</th><th>选型</th><th>说明</th></tr>
+    <tr><td><code>D8</code> LED</td><td><b>ARKLED D-G080508G1-KS2</b>（<code>C107402</code>）· 0805 翠绿 · Vf 3.2 V · 330 mcd@5 mA · 现货 71K+</td><td>任何 0805 翠绿/蓝色 LED 均可替代（Vf 2.5~3.3 V 范围内电流 1.2~2.5 mA，都够亮）</td></tr>
+    <tr><td><code>R50</code> 限流</td><td><b>1 kΩ 0805</b>（复用板上现有 1 k 料 <code>0805W8F1001T5E</code>，零新增品类）</td><td>1.8 mA；若嫌暗可换 680 Ω（≈2.6 mA）</td></tr>
+  </table>
+  <div class="note">不占 GPIO ✓（纯电源指示）。位置建议放板边、靠近 Type-C，外壳开一个 Ø1.5~2 mm 导光孔。</div>
+</div>
+
+<!-- ===================== J ===================== -->
+<h2>J. 网名规范化（收尾，可选）</h2>
+<div class="card">
+  <table>
+    <tr><th>现名</th><th>建议名</th><th>位置 / 说明</th></tr>
+    <tr><td><code>$1N631</code></td><td><b><code>LINE_OUT</code></b></td><td><code>C62.2</code> ↔ 座（接 G 节时顺手改）</td></tr>
+    <tr><td><code>$1N469</code></td><td><code>SPK_N</code></td><td><code>U16.5</code> ↔ <code>J7.2</code>（喇叭负）</td></tr>
+    <tr><td><code>$1N470</code></td><td><code>SPK_P</code></td><td><code>U16.8</code> ↔ <code>J7.1</code>（喇叭正）</td></tr>
+    <tr><td><code>$1N657</code></td><td><code>Q2_G</code></td><td>软启动栅极节点（<code>Q2.G</code> / <code>R30.1</code> / <code>R31.1</code> / <code>C60.2</code>）</td></tr>
+    <tr><td><code>GPIO16</code></td><td><code>BT_TXD</code></td><td><code>U1.9</code> ↔ <code>U4.22</code>（文档口径统一；可选）</td></tr>
+  </table>
+  <div class="note">改名 = 给该网加一个同名网络标号（同名自动合并为一张网）。每改完我都能复核；不想动也完全不影响电气。</div>
+</div>
+
+<!-- ===================== K ===================== -->
+<h2>K. 图纸收尾（可选，不影响电气）</h2>
+<div class="card">
+  <p>check 目前有 2 条 <code>missing-deliverable(partition/titleblock)</code> —— 指图纸缺 <b>分区框</b> 与 <b>标题块</b>。建议电气全部完成后一次做：</p>
+  <table>
+    <tr><th>项</th><th>做法</th></tr>
+    <tr><td>标题块</td><td>EasyEDA 专业版图纸设置里填：图名（ESP32-S3 V2 主板）/ 版本 / 日期 / 设计者</td></tr>
+    <tr><td>分区框</td><td>虚线框 + 文字把画面分成「USB 输入 / 电源 / 音频 / MCU / 显示 / 接口」六区（我可用 <code>sch zone-draw</code> 按现有元件几何自动生成，你说一声即可）</td></tr>
+  </table>
+  <div class="note">这是「看相」项，不影响网表与打板。不做也完全能投产。</div>
+</div>
+
 <!-- ===================== 位号 ===================== -->
 <h2>推荐位号（新件）</h2>
 <div class="card">
@@ -434,12 +635,14 @@
     <tr><td>三路 ADC</td><td><code>R44</code>~<code>R47</code> · <code>C67</code>~<code>C69</code></td></tr>
     <tr><td>buck</td><td><code>U18</code> · <code>L4</code> · <code>C70</code>~<code>C75</code> · <code>R48</code> <code>R49</code></td></tr>
     <tr><td>音频轨</td><td><code>U19</code> · <code>FB1</code> <code>FB2</code>（<b>PZ3216D601-2R0TF</b> · C317634）· <code>C76</code>~<code>C78</code></td></tr>
+    <tr><td>line-out 座（G）</td><td><code>J9</code>（建议；<code>J8</code> 是已删的旧探测点名，避免复用）</td></tr>
+    <tr><td>电源指示灯（I）</td><td><code>D8</code> LED · <code>R50</code>（1k）</td></tr>
   </table>
   <div class="note">放置时可直接命名；如果放完是自动乱号，告诉我，我一次性统一核对/改号（像 R19~R24 那样）。</div>
 </div>
 
 <div class="foot">
-  依据：活体画布（2026-10-16 17:4x）· V2_SCHEMATIC_GUIDE §9.7 / §9.6 ⑨⑩ · NS4150C / LMR50410 / LP5907 / EWM104 / PCM5102A 手册。
+  依据：活体画布（2026-10-18 20:5x：208 件 / 86 网）· V2_SCHEMATIC_GUIDE §9.7 / §9.6 ⑨⑩⑬ · NS4150C / LMR50410 / LP5907 / EWM104 / PCM5102A / TS5A23157 手册。
   <br>（本页为施工参照，不改动画布本身；画完一块记得 Ctrl+S 后让我复核。）
 </div>
 
