@@ -485,34 +485,34 @@
     <text x="540" y="86" fill="#7dcfff" font-size="13" font-weight="700" text-anchor="middle">J9  3.5mm 带开关座</text>
 
     <!-- LINE_OUT → T / R1 -->
-    <line x1="400" y1="150" x2="400" y2="130" stroke="#7aa2f7" stroke-width="2"/>
-    <line x1="400" y1="130" x2="440" y2="130" stroke="#7aa2f7" stroke-width="2"/>
-    <line x1="400" y1="150" x2="415" y2="150" stroke="#7aa2f7" stroke-width="2"/>
-    <line x1="415" y1="150" x2="415" y2="170" stroke="#7aa2f7" stroke-width="2"/>
-    <line x1="415" y1="170" x2="440" y2="170" stroke="#7aa2f7" stroke-width="2"/>
+    <line x1="400" y1="150" x2="400" y2="270" stroke="#7aa2f7" stroke-width="2"/>
+    <line x1="400" y1="230" x2="440" y2="230" stroke="#7aa2f7" stroke-width="2"/>
+    <line x1="400" y1="270" x2="440" y2="270" stroke="#7aa2f7" stroke-width="2"/>
     <circle cx="400" cy="150" r="3" fill="#7aa2f7"/>
-    <text x="452" y="134" fill="#7dcfff" font-size="12">T</text>
-    <text x="452" y="174" fill="#7dcfff" font-size="12">R1</text>
-    <text x="452" y="234" fill="#7dcfff" font-size="12">R2</text>
-    <text x="452" y="274" fill="#7dcfff" font-size="12">S</text>
+    <circle cx="400" cy="230" r="3" fill="#7aa2f7"/>
+    <text x="452" y="134" fill="#7dcfff" font-size="12">① S</text>
+    <text x="452" y="174" fill="#7dcfff" font-size="12">② R2</text>
+    <text x="452" y="234" fill="#7dcfff" font-size="12">③ R1</text>
+    <text x="452" y="274" fill="#7dcfff" font-size="12">④ T</text>
 
     <!-- GND → R2 / S -->
-    <line x1="330" y1="238" x2="380" y2="238" stroke="#565f89" stroke-width="2"/>
-    <line x1="380" y1="238" x2="380" y2="230" stroke="#565f89" stroke-width="2"/>
-    <line x1="380" y1="230" x2="440" y2="230" stroke="#565f89" stroke-width="2"/>
-    <line x1="380" y1="238" x2="380" y2="270" stroke="#565f89" stroke-width="2"/>
-    <line x1="380" y1="270" x2="440" y2="270" stroke="#565f89" stroke-width="2"/>
-    <circle cx="380" cy="238" r="3" fill="#565f89"/>
+    <line x1="440" y1="130" x2="410" y2="130" stroke="#565f89" stroke-width="2"/>
+    <line x1="440" y1="170" x2="410" y2="170" stroke="#565f89" stroke-width="2"/>
+    <line x1="410" y1="130" x2="410" y2="170" stroke="#565f89" stroke-width="2"/>
+    <line x1="410" y1="130" x2="410" y2="108" stroke="#565f89" stroke-width="2"/>
+    <line x1="394" y1="108" x2="426" y2="108" stroke="#565f89" stroke-width="2.5"/>
+    <line x1="400" y1="102" x2="420" y2="102" stroke="#565f89" stroke-width="2.5"/>
+    <line x1="404" y1="96" x2="416" y2="96" stroke="#565f89" stroke-width="2.5"/>
 
     <!-- SW-A / SW-B（右侧引出，下半区使用） -->
     <line x1="640" y1="215" x2="682" y2="215" stroke="#e0af68" stroke-width="2"/>
     <line x1="640" y1="250" x2="682" y2="250" stroke="#e0af68" stroke-width="2"/>
-    <text x="688" y="219" fill="#e0af68" font-size="11.5">SW-A</text>
-    <text x="688" y="254" fill="#e0af68" font-size="11.5">SW-B</text>
-    <text x="540" y="334" fill="#565f89" font-size="11" text-anchor="middle">未插入：SW-A ↔ SW-B 导通（常闭）｜插入：断开</text>
+    <text x="688" y="219" fill="#e0af68" font-size="11.5">⑤ 悬空</text>
+    <text x="688" y="254" fill="#e0af68" font-size="11.5">⑥ 悬空</text>
+    <text x="540" y="334" fill="#565f89" font-size="11" text-anchor="middle">③④ 与 ⑤⑥ 是常闭配对（未插入通 / 插入断）—— ⑤⑥ 本设计悬空</text>
 
     <!-- ===== ② 插入即静音（下半区） ===== -->
-    <text x="26" y="352" fill="#565f89" font-size="13">② 插入即静音（新接）—— 用 J9 的常闭开关触点串在功放使能线上（mA 级，不碰喇叭大电流）</text>
+    <text x="26" y="352" fill="#565f89" font-size="13">② 静音（可选）—— 手拨 SPDT 串在功放使能线上（mA 级；J9 自带的 ⑤⑥ 不能干这活）</text>
 
     <text x="75" y="398" fill="#9ece6a" font-size="13" font-weight="700" text-anchor="middle">GPIO41</text>
     <text x="75" y="414" fill="#565f89" font-size="10.5" text-anchor="middle">U1.34</text>
@@ -522,7 +522,7 @@
     <circle cx="160" cy="450" r="4" fill="#1a1b26" stroke="#e0af68" stroke-width="2"/>
     <circle cx="222" cy="450" r="4" fill="#1a1b26" stroke="#e0af68" stroke-width="2"/>
     <line x1="164" y1="450" x2="218" y2="443" stroke="#e0af68" stroke-width="2.2"/>
-    <text x="191" y="480" fill="#e0af68" font-size="11.5" text-anchor="middle">J9 SW（常闭）</text>
+    <text x="191" y="480" fill="#e0af68" font-size="11.5" text-anchor="middle">手拨 SPDT（独立件）</text>
 
     <line x1="226" y1="450" x2="330" y2="450" stroke="#7aa2f7" stroke-width="2"/>
     <text x="278" y="438" fill="#9ece6a" font-size="12.5" text-anchor="middle">AMP_CTRL（新网）</text>
@@ -542,29 +542,31 @@
     <text x="288" y="498" fill="#f7768e" font-size="10.5">（R26.2 要挪到 CTRL 侧）</text>
 
     <!-- 状态说明 -->
-    <text x="500" y="398" fill="#a9b1d6" font-size="12.5">未插入（触点闭合）：CTRL 随 GPIO41 → 固件正常开关功放</text>
-    <text x="500" y="424" fill="#f7768e" font-size="12.5" font-weight="700">插入（触点断开）：CTRL 被 R26 拉低 → 功放 shutdown → 喇叭静音</text>
+    <text x="500" y="398" fill="#a9b1d6" font-size="12.5">开关 ON：CTRL 随 GPIO41 → 固件正常开关功放</text>
+    <text x="500" y="424" fill="#f7768e" font-size="12.5" font-weight="700">开关 OFF：CTRL 被 R26 拉低 → 功放 shutdown → 喇叭静音</text>
     <text x="500" y="450" fill="#565f89" font-size="11.5">改动：GPIO41 网现为 {U1.34, R26.2, U16.1} → 拆出 U16.1 与 R26.2 组成 AMP_CTRL</text>
-    <text x="500" y="472" fill="#565f89" font-size="11.5">SW-A → GPIO41 网；SW-B → AMP_CTRL；其余触点（检测组）悬空</text>
+    <text x="500" y="472" fill="#565f89" font-size="11.5">SPDT 公共端 → GPIO41 网；常开端 → AMP_CTRL；J9 的 ⑤⑥ 悬空</text>
   </svg>
   <table>
     <tr><th>接线项</th><th>接法</th></tr>
-    <tr><td><code>$1N631</code>（<code>C62.2</code> / <code>R41.2</code>）</td><td>→ 座 <b>T</b> 与 <b>R1</b>（双声道同信号）；网名改为 <code>LINE_OUT</code></td></tr>
-    <tr><td>GND</td><td>→ 座 <b>R2</b> 与 <b>S</b>（TRS / TRRS 耳机都兼容）</td></tr>
+    <tr><td><code>$1N631</code>（<code>C62.2</code> / <code>R41.2</code>）</td><td>→ 座 <b>④ T</b> 与 <b>③ R1</b>（双声道同信号）；网名改为 <code>LINE_OUT</code></td></tr>
+    <tr><td>GND</td><td>→ 座 <b>① S</b> 与 <b>② R2</b>（TRS / TRRS 耳机都兼容）</td></tr>
+    <tr><td>座 <b>⑤</b> / <b>⑥</b></td><td><b>悬空</b>——它们是 ③/④ 的常闭触点，<span class="k">绝不能接控制信号</span>（见下方更正说明）</td></tr>
     <tr><td><code>U16.1</code>（CTRL）</td><td><span class="k">从 <code>GPIO41</code> 网拆出</span> → 新网 <code>AMP_CTRL</code></td></tr>
     <tr><td><code>R26.2</code>（2.2 k 下拉）</td><td><span class="k">从 <code>GPIO41</code> 网拆出</span> → 接 <code>AMP_CTRL</code>（另一端 GND 不动）</td></tr>
-    <tr><td>座 <b>SW-A</b></td><td>→ <code>GPIO41</code> 网（<code>U1.34</code> 同节点）</td></tr>
-    <tr><td>座 <b>SW-B</b></td><td>→ <code>AMP_CTRL</code>（<code>U16.1</code> / <code>R26.2</code> 同网）</td></tr>
+    <tr><td>手拨 SPDT（独立件 · 可选）</td><td>公共端 → <code>GPIO41</code>；常开端 → <code>AMP_CTRL</code>（mA 级，任何小开关都行）</td></tr>
   </table>
-  <div class="note"><b>为什么开关触点串 CTRL、不串喇叭线</b>：喇叭 BTL 峰值 ≈1.23 A（3 W / 4 Ω），这类座的开关触点额定只有 0.25~0.5 A ⇒ 串喇叭会长期超载。CTRL 通路只有 mA 级（R26 2.2 k 下拉 = 1.5 mA）⇒ 任何触点都绰绰有余。插入 ⇒ 触点断开 ⇒ CTRL 被 R26 拉低 ⇒ NS4150C <b>shutdown</b> ⇒ 喇叭完全静音（附带省电、无底噪）。</div>
+  <div class="note"><b>★ 2026-10-18 晚更正：这个座的两组开关不能当「独立开关」用</b>（依据 SOFNG 官方 SO-F006 规格书 SCHEMATIC + 3D 视图）。⑤/⑥ 分别与 ③（R1）/④（Tip）的弹片<b>常闭配对</b>——「开关的一端就是音频弹片」：未插入时 ⑤≡③=R1 音频、⑥≡④=Tip 音频。把 ⑤/⑥ 接控制端的话，未插入时 3.3 V 推挽会直接灌进 <code>LINE_OUT</code>，插入时控制端又悬空 ⇒ <b>两头都不行，只能悬空</b>。<br>另外：开关触点也<b>不能串喇叭</b>（BTL 峰值 1.23 A vs 触点 250 mA）。</div>
   <table>
     <tr><th>候选座</th><th>编号</th><th>关键参数</th><th>价格 / 库存</th><th>评价</th></tr>
     <tr><td><b>PJ-342E</b>（硕方）</td><td><b>C22355773</b></td><td>3.5 <b>四段 TRRS</b> · <b>常闭式</b> · 250 mA/24 V · SMD 沉板卧式</td><td>¥1.22 / 683</td><td class="ok">★ 主推（唯一明示「常闭」）</td></tr>
     <tr><td>KH-PJ-325C（金航标）</td><td>C5123138</td><td>TRS 三极 · 带开关 · 插件 14×8.1 mm</td><td>¥1.23 / 1225</td><td>备选（插件好焊；常闭需实物确认）</td></tr>
     <tr><td>PJ-342C（品赞）</td><td>C2837091</td><td>四级 · 两组开关 · <b>1 A</b>/20 V · SMD 沉板</td><td>¥1.71 / 1615</td><td>触点余量最大（两组开关可留一组备用）</td></tr>
   </table>
-  <div class="note"><b>到货 30 秒验证</b>：万用表通断档量开关组两脚——<b>未插入应导通</b>（常闭）✓。若相反（常开），告诉我改接法（插入时把 CTRL 经 1 k 拉低）。</div>
-  <div class="note"><b>TRRS 兼容性</b>：T/R1 都接 <code>LINE_OUT</code>、R2/S 都接 GND ⇒ 插普通 TRS 耳机（T=L · R=R · S=GND）✓；插带麦 TRRS 耳机（R2=GND · S=MIC→GND）✓ 麦克风接地无害。</div>
+  <div class="note"><b>到货 30 秒验证（万用表通断档）</b>：未插入——③↔⑤ 通、④↔⑥ 通（常闭 ✓）；插入耳机——两对都断开。再量 ①②③④ 对插头各段：④↔尖端（Tip/L）· ③↔第一环（R1/R）· ②↔第二环（R2/MIC）· ①↔套管（S）。</div>
+  <div class="note"><b>TRRS 兼容性</b>：④T/③R1 都接 <code>LINE_OUT</code>、①S/②R2 都接 GND ⇒ 插普通 TRS 耳机（T=L · R=R · S=GND）✓；插带麦 TRRS 耳机（R2=GND · MIC→GND）✓ 麦克风接地无害。</div>
+  <div class="note"><b>「插入即静音」怎么办（二选一）</b>：① <b>手拨 SPDT 开关</b>（推荐：便宜、零固件）串 <code>GPIO41 ↔ AMP_CTRL</code>；② 换「开关独立」的座（如 <code>KH-PJ-325C</code> 5P = 3 信号 + 2 独立开关脚，<b>但需实物确认独立性</b>）。</div>
+  <div class="note"><b>脚位依据</b>：SOFNG 官方规格书 SO-F006 的 SCHEMATIC + 3D 视图：① 连管体 = Sleeve；弹片从浅到深 ②→③→④；④↔⑥、③↔⑤ 箭头联动 = 常闭配对。</div>
 </div>
 
 <!-- ===================== I ===================== -->
