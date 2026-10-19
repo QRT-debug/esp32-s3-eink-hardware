@@ -239,6 +239,52 @@ WiFi → ESP32-S3（WebSocket 收流）
 
 切换场景要 `i2s_channel_disable()` → 重配 → `i2s_channel_enable()`。
 
+### 8.4b ★★ 共用时钟的软件坑：槽宽必须配 32 bit（否则麦克风不工作）
+
+**电气上共用 BCLK/WS 是标准做法**（I2S 是"一个 master 广播时钟、多个从机同时接收"的总线，DAC 和麦克风都只是挂在总线上的从设备，各用各的数据线）。但**软件上有一个参数必须配对**：
+
+`ICS-43434` 的 I2S 接口是 **24 bit 数据、每 WS 帧 64 个 SCK**（TDK 手册原文："24-bit, two's complement, **64 SCK cycles per WS stereo frame**"）。而 ESP32-S3 的 BCLK 由**槽宽**决定：
+
+```
+BCLK = fs × 声道数(2) × slot_bit_width
+```
+
+| `slot_bit_width` | BCLK（fs = 16 kHz）| ICS-43434 要求 64·fs | 结果 |
+|---|---|---|---|
+| 16 bit | 512 kHz（32·fs）| **1.024 MHz** | ❌ 时钟只有一半 ⇒ **麦克风不输出** |
+| 24 bit | 768 kHz（48·fs）| **1.024 MHz** | ❌ 仍不对 |
+| **32 bit** | **1.024 MHz（64·fs）** | **1.024 MHz** | ✅ **正确** |
+
+**配置（ESP-IDF 5.x）**：
+
+```c
+i2s_std_config_t std_cfg = {
+    .clk_cfg  = I2S_STD_CLK_DEFAULT_CONFIG(16000),
+    .slot_cfg = I2S_STD_PHILIPS_SLOT_DEFAULT_CONFIG(
+                    I2S_DATA_BIT_WIDTH_16BIT,      /* 有效数据 16 bit */
+                    I2S_SLOT_MODE_STEREO),
+    .gpio_cfg = {
+        .mclk = I2S_GPIO_UNUSED,
+        .bclk = GPIO_NUM_47,
+        .ws   = GPIO_NUM_48,
+        .dout = GPIO_NUM_38,   /* → PCM5102A DIN */
+        .din  = GPIO_NUM_7,    /* ← ICS-43434 SD  */
+    },
+};
+std_cfg.slot_cfg.slot_bit_width = I2S_SLOT_BIT_WIDTH_32BIT;   /* ★ 关键这一行 */
+```
+
+> 对 `PCM5102A` 无副作用：它支持 16/24/32 bit 槽，32 bit 槽下照常取有效数据。
+
+**判据（首板必测）**：示波器量 `GPIO47`（BCLK），fs = 16 kHz 时必须是 **1.024 MHz**。量到 512 kHz 就是槽宽配错了。
+
+---
+
+**电气上还要注意两条（不是致命，但影响音质）**：
+
+1. **驱动能力**：一个 GPIO 同时驱动 `PCM5102A` + `ICS-43434` 两个 CMOS 输入（各约 3 pF）——ESP32-S3 默认 20 mA 驱动，**绰绰有余**，不需要缓冲器。
+2. **串扰**：`SCK`/`WS` 是方波，**走线必须远离模拟音频线**（`MIXLP`/`MIXSL`、`AMP_INP`/`AMP_INN`、`LINE_OUT`）。1 MHz 下没有传输线效应（10 cm 走线延迟约 0.6 ns，远小于 GPIO 上升时间），**不需要端接电阻**；但耦合到模拟线会直接变成可听噪声。
+
 ### 8.5 麦克风选型
 
 | 型号 | 立创编号 | 电压 | SNR | 封装 | 库存 | 价格 | 判定 |
