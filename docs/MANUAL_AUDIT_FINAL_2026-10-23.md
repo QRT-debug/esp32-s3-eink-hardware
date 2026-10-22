@@ -172,3 +172,36 @@ V_$1N649 = (V1/100k + V2/100k + 0 + 0) × 25k = (V1+V2)/4
 - 电路设计：**0 处必须修改**
 - PCB 约束：**13 条**（前轮 10 条 + 本轮 3 条）
 - 固件待办：**3 条**（`GPIO41` 上电时序、数字音量默认 ≤−10 dB、SPI 降频后路）
+
+
+## 五、收尾补核（USB 链路 + 文档更正）
+
+### 5.1 USB 链路逐脚核对 ✅（全通）
+
+```
+J4.A6/B6 (DP)  → D+_USB → U12.1(I/O1) → U12.6(I/O1) → USB_DP → U1.14 (IO20)  ← ESP32-S3 的 D+
+J4.A7/B7 (DN)  → D-_USB → U12.3(I/O2) → U12.4(I/O2) → USB_DM → U1.13 (IO19)  ← ESP32-S3 的 D−
+J4.A4B9/B4A9 (VBUS) → VBUS_IN → F1 → VBUS_USB → U12.5(VBUS 检测)
+J4.A5/B5 (CC1/CC2) → R8/R9 5.1k 下拉 + R46/R47 1k → GPIO2/GPIO8
+```
+
+- `D+ → GPIO20`、`D− → GPIO19`：与 ESP32-S3 的 USB D+/D− 定义一致 ✅
+- USBLC6 的两对 I/O 各保护一对差分，方向无误 ✅
+- SBU1/SBU2 悬空 ✅
+
+### 5.2 文档更正（两处）
+
+1. **BOM.md `J6` 行**：原写「24P 0.5mm 翻盖，主推 C53055552」——已标作废，**V2 实际为 18P（XW05200-18，C733）**，与 `J6` 的 FPC-SMD_18P 封装一致
+2. **IC_PIN_CROSSCHECK.md `U4.1`**：加「`AUDL_R` 名称笔误」注记（R≠Right，描述为 Positive）
+
+### 5.3 U1 的 strapping/NC 脚最终清单（活体）
+
+| 引脚 | 网络 | 说明 |
+|---|---|---|
+| pin13 IO19 | `USB_DM` | USB D− ✅ |
+| pin14 IO20 | `USB_DP` | USB D+ ✅ |
+| pin15 IO3 | `GPIO3` | 频谱取样（上电被 `C64` 拉低 ⇒ JTAG 源被固定，不影响启动）|
+| pin26 IO45 | `GPIO45` | **悬空**（N16R8 的 VDD_SPI 已由 eFuse 固定，不受影响）|
+| pin16 IO46 | `GPIO46` | **悬空**（弱下拉=0，正常 ROM 日志）|
+| pin27 IO0 | `GPIO0` | `R5` 10 k 上拉（BOOT=1 正常启动）|
+| pin28~30 IO35/36/37 | NC | **SPI0/1 禁区，不引出** ✅ |
