@@ -71,7 +71,7 @@
 | 13 | IO19 | `USB_DM` | GPIO19 = **USB D−**（固定脚，不可改；需 22 Ω 串阻可选） | ✅ |
 | 14 | IO20 | `USB_DP` | GPIO20 = **USB D+**（固定脚） | ✅ |
 | 15 | IO3 | `GPIO3` | GPIO3 → **ADC1_CH2**（频谱取样 `R35`/`C64`） | ✅ |
-| 16 | IO46 | `GPIO46` | GPIO46 — **strapping（ROM log）**，上电须为低；本板仅留网名、未接任何负载　★ 画布网名 `GPIO46`，仅 1 个成员（预留） | ⚠️ |
+| 16 | IO46 | `GPIO46` | GPIO46 — **strapping（启动模式，配 `GPIO0`；兼 ROM log）**；内部**弱下拉 ⇒ 0**，悬空合规（`GPIO0`=1 时本脚**任意值**都进 SPI Boot；0 时 ROM log 正常）　★ 画布网名 `GPIO46`，仅 1 个成员（预留，**无需 NC**）| ✅ |
 | 17 | IO9 | `GPIO9` | GPIO9 → TFT（FSPI 原生组） | ✅ |
 | 18 | IO10 | `GPIO10` | GPIO10 → **TFT CS** | ✅ |
 | 19 | IO11 | `GPIO11` | GPIO11 → **SPI MOSI**（TFT+SD 共用） | ✅ |
@@ -81,7 +81,7 @@
 | 23 | IO21 | `GPIO21` | GPIO21 → **SD CS**（`R13` 上拉） | ✅ |
 | 24 | IO47 | `GPIO47` | GPIO47 → **I2S BCLK**（DAC + 麦克风共用） | ✅ |
 | 25 | IO48 | `GPIO48` | GPIO48 → **I2S LRCK**（DAC + 麦克风共用） | ✅ |
-| 26 | IO45 | `GPIO45` | GPIO45 — **strapping（VDD_SPI 电压选择）**，上电须为低；本板仅留网名、未接任何负载　★ 画布网名 `GPIO45`，仅 1 个成员（预留） | ⚠️ |
+| 26 | IO45 | `GPIO45` | GPIO45 — **strapping（VDD_SPI 电压：0=3.3 V 默认 / 1=1.8 V）**；★ N16R8 封装内 flash/PSRAM ⇒ eFuse 固定，**该脚被忽略**；内部弱下拉 ⇒ 悬空合规　★ 画布网名 `GPIO45`，仅 1 个成员（预留，**无需 NC**）| ✅ |
 | 27 | IO0 | `GPIO0` | GPIO0 — **strapping（Boot）**；`BOOT1` 按键 + `R5` 上拉 | ✅ |
 | 28 | IO35 | `**(未接)**` | GPIO35 — **被 Octal PSRAM 占用，禁止使用** | ✅ |
 | 29 | IO36 | `**(未接)**` | GPIO36 — **被 Octal PSRAM 占用，禁止使用** | ✅ |
