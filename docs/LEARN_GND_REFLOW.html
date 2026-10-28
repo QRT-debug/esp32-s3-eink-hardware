@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GND 回流与参考平面 · 讲义</title>
+<style>
+:root{
+  --ink:#26251f; --ink2:#5a584d; --ink3:#8a877a;
+  --bg:#fbfaf6; --card:#ffffff; --line:#e4e0d4;
+  --amber:#b45309; --amber-bg:#fdf6ec;
+  --green:#166534; --green-bg:#f0f7f0;
+  --red:#b91c1c; --red-bg:#fdf2f2;
+  --blue:#1e4d7b; --blue-bg:#eef4fa;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; padding:0; background:var(--bg); color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC",sans-serif;
+  font-size:15px; line-height:1.85; -webkit-font-smoothing:antialiased;
+}
+article{max-width:860px; margin:0 auto; padding:56px 40px 100px}
+header.top{border-bottom:2px solid var(--ink); padding-bottom:22px; margin-bottom:14px}
+header.top .kicker{font-size:12px; letter-spacing:.18em; color:var(--ink3); text-transform:uppercase; margin-bottom:10px}
+header.top h1{font-size:31px; line-height:1.3; margin:0 0 12px; font-weight:600; letter-spacing:.01em}
+header.top p.sub{font-size:14px; color:var(--ink2); margin:0}
+
+.lede{
+  background:var(--card); border-left:4px solid var(--amber);
+  padding:20px 24px; margin:28px 0 34px; border-radius:0 8px 8px 0;
+  box-shadow:0 1px 3px rgba(0,0,0,.04);
+}
+.lede .lbl{font-size:11px; letter-spacing:.16em; color:var(--amber); font-weight:600; margin-bottom:6px}
+.lede p{margin:0; font-size:16px; line-height:1.75; font-weight:500}
+
+nav.toc{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:20px 26px; margin-bottom:40px}
+nav.toc .h{font-size:11px; letter-spacing:.16em; color:var(--ink3); margin-bottom:12px}
+nav.toc ol{margin:0; padding-left:20px; columns:2; column-gap:36px; font-size:13.5px; line-height:2}
+nav.toc a{color:var(--ink2); text-decoration:none; border-bottom:1px solid transparent}
+nav.toc a:hover{color:var(--amber); border-bottom-color:var(--amber)}
+nav.toc .hint{margin-top:14px; padding-top:14px; border-top:1px dashed var(--line); font-size:13px; color:var(--ink3); line-height:1.8}
+
+h2{
+  font-size:21px; font-weight:600; margin:56px 0 18px; padding-left:16px;
+  border-left:4px solid var(--ink); line-height:1.45; scroll-margin-top:20px;
+}
+h2 .num{color:var(--ink3); font-weight:400; margin-right:10px; font-variant-numeric:tabular-nums}
+h3{font-size:16px; font-weight:600; margin:32px 0 10px; color:var(--ink)}
+p{margin:14px 0}
+strong{font-weight:600}
+em{font-style:normal; background:linear-gradient(transparent 62%, #fde9c8 62%); padding:0 2px}
+
+blockquote{
+  margin:24px 0; padding:16px 22px; background:var(--blue-bg);
+  border-left:3px solid var(--blue); border-radius:0 8px 8px 0;
+}
+blockquote p{margin:0; font-size:15.5px; line-height:1.8}
+blockquote .t{display:block; font-size:11px; letter-spacing:.14em; color:var(--blue); font-weight:600; margin-bottom:6px}
+
+.warn{
+  margin:22px 0; padding:16px 22px; background:var(--red-bg);
+  border-left:3px solid var(--red); border-radius:0 8px 8px 0; font-size:14.5px;
+}
+.warn b{color:var(--red)}
+
+.ok{
+  margin:22px 0; padding:16px 22px; background:var(--green-bg);
+  border-left:3px solid var(--green); border-radius:0 8px 8px 0; font-size:14.5px;
+}
+.ok b{color:var(--green)}
+
+table{width:100%; border-collapse:collapse; margin:20px 0; font-size:14px; background:var(--card)}
+th{
+  text-align:left; padding:10px 14px; background:#f4f2ea; font-weight:600;
+  font-size:13px; color:var(--ink2); border-bottom:1.5px solid var(--line);
+}
+td{padding:11px 14px; border-bottom:1px solid var(--line); vertical-align:top; line-height:1.7}
+tr:last-child td{border-bottom:none}
+td.num{font-variant-numeric:tabular-nums; white-space:nowrap}
+.yes{color:var(--green); font-weight:600}
+.no{color:var(--red); font-weight:600}
+
+code{
+  font-family:"SF Mono",Consolas,"Cascadia Mono",monospace;
+  font-size:12.5px; background:#f2efe6; padding:1.5px 5px; border-radius:3px;
+  color:#8a4b00;
+}
+pre{
+  background:#f7f5ee; border:1px solid var(--line); border-radius:8px;
+  padding:16px 20px; overflow-x:auto; font-size:12.5px; line-height:1.7;
+  font-family:"SF Mono",Consolas,"Cascadia Mono",monospace; color:#3d3b33;
+}
+
+figure{margin:30px 0; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:22px 20px 14px}
+figure svg{display:block; width:100%; height:auto}
+figcaption{margin-top:12px; padding-top:12px; border-top:1px dashed var(--line); font-size:12.5px; color:var(--ink3); line-height:1.7}
+
+.sep{height:1px; background:var(--line); margin:56px 0}
+
+.takeaway{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:8px 26px 20px; margin:28px 0}
+.takeaway ol{padding-left:22px}
+.takeaway li{margin:14px 0; font-size:15px; line-height:1.8}
+.takeaway li b{color:var(--amber)}
+
+footer{margin-top:64px; padding-top:22px; border-top:1px solid var(--line); font-size:12.5px; color:var(--ink3); line-height:1.9}
+
+@media print{
+  body{background:#fff; font-size:11.5pt}
+  article{max-width:none; padding:0}
+  h2{page-break-after:avoid}
+  figure,table{page-break-inside:avoid}
+  nav.toc{page-break-after:always}
+}
+@media (max-width:640px){
+  article{padding:32px 20px 60px}
+  header.top h1{font-size:24px}
+  nav.toc ol{columns:1}
+}
+</style>
+</head>
+<body>
+<article>
+
+<header class="top">
+  <div class="kicker">讲义 · 2026-10-23</div>
+  <h1>GND 回流与参考平面</h1>
+  <p class="sub">从「电流为什么必须回去」讲到「四层板到底买到了什么」</p>
+</header>
+
+<div class="lede">
+  <div class="lbl">一句话总纲</div>
+  <p>你画的每一根线都只是「去路」。回路是电流自己找的，不归你管 —— 而板上绝大多数玄学问题，都出在这条你没画的回路上。</p>
+</div>
+
+<nav class="toc">
+  <div class="h">目录</div>
+  <ol>
+    <li><a href="#c1">电流不是流到地就没了</a></li>
+    <li><a href="#c2">回流走哪条路：由频率决定</a></li>
+    <li><a href="#c3">参考平面到底是什么</a></li>
+    <li><a href="#c4">四层板到底买到了什么</a></li>
+    <li><a href="#c5">三种「地」的分工</a></li>
+    <li><a href="#c6">电源平面要不要分割</a></li>
+    <li><a href="#c7">过孔的真面目</a></li>
+    <li><a href="#c8">音频：判据为什么不一样</a></li>
+    <li><a href="#c9">八个常见误区</a></li>
+    <li><a href="#c10">画板自检清单</a></li>
+    <li><a href="#c11">如果只记五句话</a></li>
+  </ol>
+  <div class="hint">
+    <b>怎么读：</b>只想记结论 → 直接看第 9、10、11 章。<br>
+    想真正搞懂 → 按顺序，<b>第 2、3、4 章是核心</b>，其余都是它们的推论。
+  </div>
+</nav>
+
+<h2 id="c1"><span class="num">01</span>先纠正一个直觉：电流不是「流到地就没了」</h2>
+
+<p>原理图上画电路，总归是画一根线接到一个「地」符号，仿佛电荷到了那里就消失了。</p>
+
+<p>不会。<strong>电流必须走闭合回路</strong> —— 从源的正极出发，经过负载，再等量地回到源的负极。板上那片叫 GND 的铜，就是这条<em>回程</em>要走的路。</p>
+
+<p>传统画法把回路藏起来了：它用一个「地符号」代替了整条回程线，让人误以为回程不重要、走哪都行。这是一个持续了几十年的视觉误导。</p>
+
+<blockquote>
+  <span class="t">核心认知</span>
+  <p>谈 GND，谈的从来不是「接地电位」（这个电位是多少伏并不重要，因为它只是个参考），而是 <b>回流路径</b>。信号完整性和 EMC 的问题，几乎全部发生在「你没画的那一半回路」上。</p>
+</blockquote>
+
+<p>这个视角一转过来，很多说法立刻就顺了：「地线要粗」其实是「回流路径要短/宽」；「地要整片」其实是「回流要能贴着走线走」；「数字地模拟地要分开」其实是「大电流的回流别穿过小信号的区域」。</p>
+
+<h2 id="c2"><span class="num">02</span>回流走哪条路：由频率决定</h2>
+
+<p>回流不是你让它走哪它就走哪，也不是「走最短的路」。它走的是 <strong>阻抗最小的路</strong>。而阻抗里电阻 R 和电感 <em>jωL</em> 谁说了算，取决于频率。</p>
+
+<table>
+  <thead><tr><th style="width:24%">频率</th><th style="width:20%">谁主导</th><th>回流走哪</th></tr></thead>
+  <tbody>
+    <tr><td class="num">低于约 1 MHz</td><td>电阻 R</td><td>几何最短的路 —— 可能在顶层绕，可能走你画的地线</td></tr>
+    <tr><td class="num">高于约 1 MHz</td><td>电感 <em>jωL</em></td><td><b>紧贴信号线正下方</b>，即环路面积最小的那条路</td></tr>
+  </tbody>
+</table>
+
+<p>为什么高频一定走正下方？因为信号电流和回流电流方向相反。两条反向电流靠得越近，它们产生的磁场越互相抵消，回路电感就越小。这正是「平行双线」成为传输线的原因 —— <strong>信号和它的回流，本来就是一对，不是两回事。</strong></p>
+
+<p>用本板 10 mm 长的一段线估算量级：</p>
+
+<table>
+  <thead><tr><th style="width:34%">回流走哪</th><th style="width:32%">与信号的距离</th><th>这段线的回路电感</th></tr></thead>
+  <tbody>
+    <tr><td>走 L2 平面（正下方）</td><td class="num">垂直 0.2 mm</td><td class="num"><b>≈ 2 nH</b></td></tr>
+    <tr><td>走顶层铜绕远</td><td class="num">水平 1~5 mm</td><td class="num"><b>≈ 10 nH</b></td></tr>
+  </tbody>
+</table>
+
+<p>这点电感在 100 MHz 时的阻抗是：2 nH → 1.26 Ω，10 nH → 6.3 Ω。<strong>同一根线，只因为回流路径选错，特性阻抗就差 5 倍</strong>。接着就是边沿变缓、反射、辐射一起出现。</p>
+
+<div class="warn">
+  <b>最容易搞错的一点：</b>数字信号「看起来是直流的」，但它的<b>边沿</b>是高频的。一个 5 ns 的上升沿，等效频谱成分到 100 MHz 量级。所以板上所有数字信号 —— SPI、I²S、USB、时钟 —— <b>一律按高频处理</b>，回流必须能贴着正下方走。相反，真正的低速线（按键、LED、使能）才可以用「电阻最小」那套。
+</div>
+
+<h2 id="c3"><span class="num">03</span>参考平面到底是什么</h2>
+
+<p>定义很朴素：<strong>信号回流用来「贴着走」的那一整片导体，就是这条信号的参考平面。</strong></p>
+
+<p>它需要满足三条，缺一不可：</p>
+
+<table>
+  <thead><tr><th style="width:8%">#</th><th style="width:30%">条件</th><th>为什么</th></tr></thead>
+  <tbody>
+    <tr><td class="num">1</td><td>面积够大</td><td>回流是散开的，一小块铜接不住</td></tr>
+    <tr><td class="num">2</td><td>对交流低阻抗</td><td>回流要能几乎无代价地流过去</td></tr>
+    <tr><td class="num">3</td><td>同一网络、连续</td><td>一旦断开，回流就得绕路</td></tr>
+  </tbody>
+</table>
+
+<p>注意第 2 条 —— <strong>参考平面不一定叫 GND。</strong></p>
+
+<p>3V3 平面上挂着 10 µF 去耦，在 1 MHz 时它对地的阻抗是 <code>1/(2π × 1M × 10µ) ≈ 0.016 Ω</code>。对回流来说，这和短路没有区别。所以 3V3 平面完全可以当参考平面用。</p>
+
+<p>这正是四层板层叠 <code>L1 信号 / L2 GND / L3 3V3 / L4 信号</code> 能成立的原因：<strong>两片信号层一上一下，各自有一个紧贴的参考平面。</strong> L1 认 L2，L4 认 L3。</p>
+
+<h3>3.1 铁律：一个信号全程只认一个平面</h3>
+
+<p>这是 PCB 设计里最容易违反、后果最严重的一条。</p>
+
+<p>假设一条线从「以 L2 为参考」的区域走到「以 L3 为参考」的区域，中间必然跨过平面的边界或缝隙。此时回流的处境很尴尬：它想跟着信号走，但正下方没铜了。</p>
+
+<p>结果只有一个 —— 回流绕到最近的去耦电容那里跳过去，再绕回来。这段绕行通常是几毫米到几厘米，<strong>环路面积瞬间放大几十倍</strong>。于是三件事同时发生：</p>
+
+<p>① <strong>辐射</strong>：大环路 = 一个效率不错的环形天线。② <strong>串扰</strong>：大回路更容易被附近的电场/磁场耦合。③ <strong>边沿退化</strong>：回路电感大，di/dt 时压降大。</p>
+
+<figure>
+<svg viewBox="0 0 820 472" role="img" xmlns="http://www.w3.org/2000/svg">
+<title>跨参考平面分割的两种情形</title>
+<desc>情况 A 没有缝合电容，回流只能绕到几毫米外的去耦电容；情况 B 在跨点旁加 100 nF，回流就近过桥。</desc>
+<defs>
+  <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+</defs>
+
+<text x="20" y="26" font-size="13" font-weight="600" fill="#b91c1c">情况 A · 没有缝合电容</text>
+<text x="250" y="26" font-size="11.5" fill="#b91c1c">回流只能绕到几 mm 外的去耦电容</text>
+
+<line x1="40" y1="72" x2="780" y2="72" stroke="#b45309" stroke-width="3"/>
+<text x="40" y="60" font-size="11" fill="#8a877a">信号线 L1</text>
+<circle cx="150" cy="72" r="4" fill="#26251f"/>
+<circle cx="660" cy="72" r="4" fill="#26251f"/>
+<text x="134" y="62" font-size="11" fill="#5a584d" text-anchor="end">源</text>
+<text x="676" y="62" font-size="11" fill="#5a584d" text-anchor="start">负载</text>
+
+<rect x="40" y="150" width="356" height="20" fill="#8a8578"/>
+<rect x="448" y="150" width="332" height="20" fill="#a8a49a"/>
+<text x="150" y="164" font-size="10.5" fill="#ffffff" text-anchor="middle">GND 平面 L2</text>
+<text x="610" y="164" font-size="10.5" fill="#ffffff" text-anchor="middle">别的网络 3V3</text>
+<line x1="396" y1="140" x2="396" y2="180" stroke="#b91c1c" stroke-width="1.5" stroke-dasharray="4 3"/>
+<line x1="444" y1="140" x2="444" y2="180" stroke="#b91c1c" stroke-width="1.5" stroke-dasharray="4 3"/>
+<text x="420" y="198" font-size="11" fill="#b91c1c" text-anchor="middle">缝隙</text>
+
+<path d="M150 76 V112 H660 V76" fill="none" stroke="#b91c1c" stroke-width="1.8" stroke-dasharray="6 4" marker-end="url(#ar)"/>
+<text x="405" y="134" font-size="11.5" fill="#b91c1c" text-anchor="middle">回流被迫绕行数十 mm，环路面积暴涨</text>
+
+<text x="20" y="262" font-size="13" font-weight="600" fill="#166534">情况 B · 跨点旁加 100 nF 缝合电容</text>
+
+<line x1="40" y1="308" x2="780" y2="308" stroke="#b45309" stroke-width="3"/>
+<circle cx="150" cy="308" r="4" fill="#26251f"/>
+<circle cx="660" cy="308" r="4" fill="#26251f"/>
+
+<rect x="40" y="386" width="356" height="20" fill="#8a8578"/>
+<rect x="448" y="386" width="332" height="20" fill="#a8a49a"/>
+<line x1="396" y1="374" x2="396" y2="418" stroke="#b91c1c" stroke-width="1.5" stroke-dasharray="4 3"/>
+<line x1="444" y1="374" x2="444" y2="418" stroke="#b91c1c" stroke-width="1.5" stroke-dasharray="4 3"/>
+
+<path d="M392 386 V364 H408" fill="none" stroke="#166534" stroke-width="2"/>
+<line x1="408" y1="354" x2="408" y2="374" stroke="#166534" stroke-width="2"/>
+<line x1="416" y1="354" x2="416" y2="374" stroke="#166534" stroke-width="2"/>
+<path d="M416 364 H448 V386" fill="none" stroke="#166534" stroke-width="2"/>
+<text x="412" y="344" font-size="10.5" fill="#166534" text-anchor="middle">100 nF</text>
+
+<path d="M150 312 V398 H392" fill="none" stroke="#166534" stroke-width="1.8" marker-end="url(#ar)"/>
+<path d="M448 398 H660 V312" fill="none" stroke="#166534" stroke-width="1.8" marker-end="url(#ar)"/>
+
+<text x="420" y="442" font-size="11.5" fill="#166534" text-anchor="middle">回流在跨点旁 2 mm 内过桥，环路面积几乎不变</text>
+</svg>
+<figcaption>跨平面是 PCB 的头号 EMI 来源。补救手段只有一个：在跨越点旁边放一颗 100 nF，给回流一条「就近过桥」的路。位置比容值重要得多 —— 放在 20 mm 外的 100 nF 等于没放。</figcaption>
+</figure>
+
+<blockquote>
+  <span class="t">最有用的一句判据</span>
+  <p><b>「这根线的回流走哪条路？」</b> —— 如果你答不出来，那它一定走的是最糟的那条。</p>
+</blockquote>
+
+<h2 id="c4"><span class="num">04</span>四层板到底买到了什么</h2>
+
+<p>一句话：<strong>把「回流与信号的距离」从 1.6 mm 压到 0.2 mm。</strong></p>
+
+<p>这里有个反直觉的事实：回流电流在平面上<strong>不是一根线，而是一片散开的分布</strong>。它横向扩散的范围，大约是信号到平面距离 h 的 3 倍（经验规则，量级正确即可）。</p>
+
+<figure>
+<svg viewBox="0 0 820 304" role="img" xmlns="http://www.w3.org/2000/svg">
+<title>两层板与四层板的回流扩散范围对比</title>
+<desc>两层板信号到参考平面距离一点六毫米，回流扩散约正负四点八毫米；四层板距离零点二毫米，扩散仅约正负零点六毫米。</desc>
+<defs>
+  <marker id="a3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+</defs>
+
+<text x="40" y="26" font-size="13" font-weight="600" fill="#b91c1c">2 层板 · h ≈ 1.6 mm</text>
+<text x="440" y="26" font-size="13" font-weight="600" fill="#166534">4 层板 · h ≈ 0.2 mm</text>
+
+<rect x="40" y="80" width="290" height="7" fill="#d6d2c4"/>
+<rect x="178" y="76" width="15" height="15" rx="2" fill="#b45309"/>
+<rect x="40" y="87" width="290" height="119" fill="#f2efe6"/>
+<text x="50" y="160" font-size="10.5" fill="#b4b0a2">介质 / 板芯</text>
+<rect x="40" y="206" width="290" height="18" fill="#8a8578"/>
+<rect x="55" y="206" width="260" height="18" fill="#b45309" opacity="0.16"/>
+<rect x="100" y="206" width="170" height="18" fill="#b45309" opacity="0.22"/>
+<rect x="150" y="206" width="70" height="18" fill="#b45309" opacity="0.34"/>
+<line x1="185" y1="91" x2="185" y2="206" stroke="#b45309" stroke-width="1.2" stroke-dasharray="4 3"/>
+
+<line x1="55" y1="244" x2="315" y2="244" stroke="#b45309" stroke-width="1" marker-start="url(#a3)" marker-end="url(#a3)"/>
+<text x="185" y="262" font-size="11" fill="#b45309" text-anchor="middle">回流扩散 ≈ ±4.8 mm</text>
+<text x="185" y="282" font-size="11" fill="#8a877a" text-anchor="middle">需要 10 mm 宽完整地 —— 两层板做不到</text>
+
+<line x1="330" y1="83" x2="348" y2="83" stroke="#c0bdb0" stroke-width="0.8"/>
+<text x="352" y="87" font-size="10.5" fill="#5a584d">L1 信号</text>
+<line x1="330" y1="215" x2="348" y2="215" stroke="#c0bdb0" stroke-width="0.8"/>
+<text x="352" y="219" font-size="10.5" fill="#5a584d">L2 GND</text>
+
+<rect x="440" y="80" width="280" height="7" fill="#d6d2c4"/>
+<rect x="573" y="76" width="15" height="15" rx="2" fill="#b45309"/>
+<rect x="440" y="87" width="280" height="17" fill="#eceae2"/>
+<rect x="440" y="104" width="280" height="18" fill="#5a584d"/>
+<rect x="560" y="104" width="40" height="18" fill="#166534" opacity="0.4"/>
+<rect x="570" y="104" width="20" height="18" fill="#166534" opacity="0.7"/>
+<rect x="440" y="122" width="280" height="46" fill="#f2efe6"/>
+<rect x="440" y="168" width="280" height="12" fill="#a8a49a"/>
+<rect x="440" y="180" width="280" height="18" fill="#f2efe6"/>
+<rect x="440" y="198" width="280" height="6" fill="#d6d2c4"/>
+<line x1="580" y1="83" x2="580" y2="104" stroke="#166534" stroke-width="1.4" stroke-dasharray="3 2"/>
+
+<line x1="720" y1="83" x2="730" y2="83" stroke="#c0bdb0" stroke-width="0.8"/>
+<text x="734" y="87" font-size="10.5" fill="#5a584d">L1 信号</text>
+<line x1="720" y1="113" x2="730" y2="113" stroke="#c0bdb0" stroke-width="0.8"/>
+<text x="734" y="117" font-size="10.5" fill="#5a584d">L2 GND</text>
+<line x1="720" y1="174" x2="730" y2="174" stroke="#c0bdb0" stroke-width="0.8"/>
+<text x="734" y="178" font-size="10.5" fill="#5a584d">L3 3V3</text>
+<line x1="720" y1="201" x2="730" y2="201" stroke="#c0bdb0" stroke-width="0.8"/>
+<text x="734" y="205" font-size="10.5" fill="#5a584d">L4 信号</text>
+
+<line x1="564" y1="244" x2="596" y2="244" stroke="#166534" stroke-width="1" marker-start="url(#a3)" marker-end="url(#a3)"/>
+<text x="580" y="262" font-size="11" fill="#166534" text-anchor="middle">回流扩散 ≈ ±0.6 mm</text>
+<text x="580" y="282" font-size="11" fill="#8a877a" text-anchor="middle">只要 L2 完整就天然满足</text>
+</svg>
+<figcaption>剖面图（垂直方向已夸张，横向扩散按比例）。橙色虚线与绿色虚线表示 h —— 信号走线到参考平面的垂直距离。回流在平面上是散开的，扩散范围约 3h：两层板 h 是整块板厚 1.6 mm，四层板 h 只是 L1-L2 介质 0.2 mm，相差 8 倍，扩散宽度也差 8 倍。</figcaption>
+</figure>
+
+<p>换算成实际约束：</p>
+
+<table>
+  <thead><tr><th style="width:26%"></th><th style="width:24%">h（信号到平面）</th><th style="width:26%">回流横向扩散</th><th>走线正下方要求的完整铜宽</th></tr></thead>
+  <tbody>
+    <tr><td><b>2 层板</b></td><td class="num">1.6 mm（整块板厚）</td><td class="num">±4.8 mm</td><td class="num">≈ 10 mm</td></tr>
+    <tr><td><b>4 层板</b></td><td class="num">0.2 mm（L1-L2 介质）</td><td class="num">±0.6 mm</td><td class="num">≈ 1.2 mm</td></tr>
+  </tbody>
+</table>
+
+<p>于是：</p>
+
+<p>在<strong>两层板</strong>上，「走线正下方 10 mm 内全是完整的地」几乎不可能做到 —— 元件、过孔、其他走线到处都是。所以两层板做 EMC 总是要靠反复试、加屏蔽、加磁珠来补救。</p>
+
+<p>在<strong>四层板</strong>上，只要那条 L2 没被挖断，这个条件天然就满足。<strong>这不是「四层板比两层好」的玄学，而是一个可以直接量出来的几何差别。</strong></p>
+
+<div class="warn">
+  <b>但前提是「完整」。</b>一张被过孔反焊盘挖成筛子的 L2，或者中间被割了一刀的 L2，价值比完整的两层板还低 —— 因为你还多花了钱、多了一层，却拿到了一个断裂的参考面。
+</div>
+
+<h2 id="c5"><span class="num">05</span>三种「地」的分工（不能互相替代）</h2>
+
+<p>四层板上，你和「地」打交道的地方有三种，它们的作用完全不同。混为一谈是最常见的错误。</p>
+
+<table>
+  <thead><tr><th style="width:24%">结构</th><th style="width:40%">真正的作用</th><th>常见误解</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><b>L2 整层 GND</b></td>
+      <td><b>主回流路径</b>，承担 95% 以上的回流电流</td>
+      <td>不是「备用通路」，是主力。它一断，全部失效</td>
+    </tr>
+    <tr>
+      <td><b>L1 顶层铺铜</b></td>
+      <td>① 屏蔽 ② 散热 ③ 给表层去耦电容一个就近的地 ④ <b>缝合到 L2 后</b>降低表层阻抗</td>
+      <td>以为它能替代 L2 承担回流 —— 不能，除非缝合得极密</td>
+    </tr>
+    <tr>
+      <td><b>IC 引脚旁的 GND 过孔</b></td>
+      <td>把器件「钉」到 L2 上，<b>2 mm 内</b>打孔</td>
+      <td>以为要先拉一段地线再打孔 —— 拉的那段就是纯电感</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>5.1 铺铜的陷阱：孤岛</h3>
+
+<p>铺铜被一排走线或过孔切碎后，每一块孤立的铜皮就变成一个<strong>悬空天线</strong>：它既不通向 L2，也不承担任何回流，只会在外面捡噪声、再辐射出去。它比不铺铜更糟。</p>
+
+<p>对策是缝合：<strong>每块孤岛打 4~8 个过孔接到 L2</strong>。缝合过孔的作用，就是把「一块孤立铜皮」变成「L2 的一个凸起」—— 电位上、交流上都是 L2 的一部分。</p>
+
+<h2 id="c6"><span class="num">06</span>电源平面要不要分割</h2>
+
+<p>这是四层板里最容易做错的决策。先把问题摆出来：板上有 8 条电源轨，L3 只有一层，放哪条？</p>
+
+<h3>6.1 先纠正一个混淆：分割割的是直流，不是交流</h3>
+
+<p>对<strong>直流</strong>来说，不同电源平面之间确实是断的（5 V 和 3.3 V 不能连）。
+但对<strong>交流（回流）</strong>来说，它们通过去耦电容是通的 —— 3V3 平面和 GND 平面之间挂着 10 µF + 100 nF，1 MHz 时阻抗只有几十 mΩ。</p>
+
+<p>所以「分割平面」这件事，表面上是在切供电能力，<strong>实际上同时切断了参考平面的连续性</strong>。后者才是真正的代价。</p>
+
+<h3>6.2 分割的两个代价</h3>
+
+<p><strong>代价一（直觉上能想到的）</strong>：右边一个 IC 需要左边的电源，就得绕远道走线。这确实存在，但通常只是占用空间、增加压降的问题，可以量化。</p>
+
+<p><strong>代价二（要命的）</strong>：L4 是信号层，它的回流全指望 L3。L3 一分割，L4 上每一条跨过缝隙的线，回流都被切断一次。</p>
+
+<pre>L1 信号  →  参考 L2（GND，完整）   →  回流全程有路
+L4 信号  →  参考 L3（3V3）
+             ↓
+           L3 一分割  ⇒  L4 每条跨缝的线都变成大环路天线</pre>
+
+<h3>6.3 本板的决策：L3 只放 3V3，其余四轨走表层</h3>
+
+<p>判据只有一条：<strong>「这个电源的源和负载，是不是散布在全板？」</strong></p>
+
+<table>
+  <thead><tr><th style="width:18%">轨</th><th style="width:20%">源</th><th style="width:30%">负载在哪</th><th style="width:14%">距离</th><th>放哪</th></tr></thead>
+  <tbody>
+    <tr><td><code>3V3</code></td><td>buck U18</td><td>模组、屏、SD、麦克风 —— <b>散布全板</b></td><td class="num">数十 mm × 4 方向</td><td class="yes">必须整层 L3</td></tr>
+    <tr><td><code>5V_SYS</code></td><td>Type-C 经 F1/Q2</td><td>buck、各 LDO、磁珠 —— 都在电源区</td><td class="num">20~30 mm</td><td>L1 粗线</td></tr>
+    <tr><td><code>3V3_AUDIO</code></td><td>LP5907 U19</td><td>DAC、蓝牙、开关、运放 —— 都在音频区</td><td class="num">&lt; 30 mm</td><td>L1 走线</td></tr>
+    <tr><td><code>3V3_BL</code></td><td>LP5907 U3</td><td>背光，只有一处</td><td class="num">数十 mm</td><td>L1 走线</td></tr>
+    <tr><td><code>5V_NS4150C</code></td><td>磁珠 FB2</td><td>功放，只有一处</td><td class="num">极短</td><td>L1 走线</td></tr>
+  </tbody>
+</table>
+
+<p><strong>只有 3V3 是分散的，所以只有它需要整层。</strong>其余四轨的源和负载就在同一个区域里，一根粗线完全够用，没必要为了「看起来整齐」塞进内层。</p>
+
+<p>而且这些轨是「脏」的 —— 开关电源的纹波、功放的脉冲电流。把它们放进内层，等于让参考平面本身带上噪声，是帮倒忙。</p>
+
+<div class="ok">
+  <b>反过来想也很清楚：</b>如果为了省表层空间，把 5 条轨都塞进 L3 做分割，那就要在 L3 上切四刀。<b>切刀的位置恰好决定 L4 上哪些线不能走</b>。省下的表层空间，会以「L4 大面积不能用」的形式还回去。
+</div>
+
+<h2 id="c7"><span class="num">07</span>过孔的真面目</h2>
+
+<p>过孔不是「导线的一段」，它是三样东西同时存在：<strong>一个电感 + 一个载流瓶颈 + 一个在平面上挖的洞</strong>。</p>
+
+<h3>7.1 它是个电感</h3>
+
+<p>一个 12 mil 过孔在 1.6 mm 板上大约 <strong>1 nH</strong>。单看很小。但注意对比：如果 GND 引脚先拉 5 mm 线再打孔，那 5 mm 线自身约 5 nH —— <strong>是过孔的 5 倍</strong>。所以规则是「<em>2 mm 内打孔</em>」，不是「打个孔就行」。孔打得对不对，取决于它离引脚多近。</p>
+
+<h3>7.2 它是个载流瓶颈</h3>
+
+<table>
+  <thead><tr><th style="width:36%">孔径（钻孔/焊盘）</th><th style="width:30%">温升 10 °C 时载流</th><th>本板用法</th></tr></thead>
+  <tbody>
+    <tr><td class="num">12 / 24 mil</td><td class="num"><b>1.8 ~ 2.3 A / 孔</b></td><td><code>5V_SYS</code> 主干 1.23 A ⇒ <b>并 2~3 孔</b>；<code>3V3</code> 670 mA ⇒ 主干分 2 孔</td></tr>
+  </tbody>
+</table>
+
+<p>要余量就并孔，别指望「加大孔径」—— 孔径加大一圈，载流提升很有限，但在平面上挖的洞大一倍。</p>
+
+<h3>7.3 它会在平面上挖个洞</h3>
+
+<p>每个过孔在它<strong>不连接</strong>的层上会挖掉一个环形铜（叫反焊盘 / antipad）。密集过孔阵列会把平面挖成筛子。<strong>关键信号正下方不要有过孔阵列</strong>，尤其是密脚 IC（<code>U14</code>/<code>U15</code>）底下 —— 那里的地孔是必要的，但要控制密度，普通 GND 脚 1~2 孔即可。</p>
+
+<h3>7.4 回答一个具体问题：两个 IC 的地，能不能全用过孔走内层？</h3>
+
+<p><strong>能，而且更好。</strong>前提是过孔多、过孔近。</p>
+
+<table>
+  <thead><tr><th style="width:40%">连接方式</th><th style="width:16%">直流连通</th><th>高频回流</th></tr></thead>
+  <tbody>
+    <tr><td>表层拉一根地线连接</td><td class="yes">通</td><td class="no">回流不走它（电感大），实际还是走 L2</td></tr>
+    <tr><td>每个 GND 脚就近打 1~2 孔到 L2</td><td class="yes">通</td><td class="yes">回流路径最短、面积最小，最优</td></tr>
+  </tbody>
+</table>
+
+<p>关键认知：<strong>表层那根「地线」在高频下几乎是无效的</strong> —— 真正在干活的一直是 L2。表层拉线唯一的作用是直流连通，而这件事过孔也能做，且做得更短。</p>
+
+<p>这也是四层板最大的红利：<strong>GND 完全不占用表层走线资源</strong>。100 × 100 的板上，如果靠表层拉地线，通常要吃掉 20~30% 的布线空间 —— 这些空间在四层板上直接省下来了，可以留给电源粗线和信号。</p>
+
+<h2 id="c8"><span class="num">08</span>音频：判据为什么不一样</h2>
+
+<p>前面讲的都是高频。音频是低频（20 Hz ~ 20 kHz），判据反而回到「电阻最小」和「避免共阻抗耦合」这两条老规矩上。</p>
+
+<p>核心威胁只有一句：<strong>大电流在地线上产生的压降，会串进小信号。</strong></p>
+
+<p>本板的具体场景：功放 NS4150C 是 BTL 输出，峰值电流可达 1 A 级。如果它的 GND 回流和运放 / ADC 的地共用同一段铜，那 <code>1 A × 几 mΩ = 几 mV</code> 的压降就会叠加到毫伏级的音频信号上 —— 你听到的就是「随音乐变化的嗡嗡声」。</p>
+
+<p>传统两层板的解法是「模拟地 / 数字地分开，单点连接」。<strong>但在四层板上，这个做法往往是害</strong>：分割地平面 = 制造回流断口 = 前面第 3、4 章说的所有问题一起复发。</p>
+
+<p>四层板的正确解法是<em>靠布局，不靠分割</em>：</p>
+
+<p>① 把功放放在板子一角，它的 GND 脚就地打孔下 L2。② 把运放 / ADC / PCM 放在另一区，它们的 GND 脚也各自就近打孔。③ L2 是同一片整铜 —— 两者的回流在 L2 上<strong>自然分开走</strong>（因为都走各自信号的正下方），不需要你人为切割。</p>
+
+<blockquote>
+  <span class="t">一句话</span>
+  <p><b>地不用分，位置要分。</b>靠物理距离和就近打孔解决，不靠割平面。</p>
+</blockquote>
+
+<h2 id="c9"><span class="num">09</span>八个常见误区</h2>
+
+<table>
+  <thead><tr><th style="width:36%">说法</th><th style="width:12%">判断</th><th>为什么</th></tr></thead>
+  <tbody>
+    <tr><td>「电流流到地就消失了」</td><td class="no">✗</td><td>地是回路的另一半，等量电流必须回去</td></tr>
+    <tr><td>「地线越粗越好」</td><td>半对</td><td>高频回流走正下方，粗不粗无所谓，关键是正下方有没有整片铜。只有直流大电流才靠粗细</td></tr>
+    <tr><td>「数字地和模拟地必须分开」</td><td>视情况</td><td>两层板常用；四层板乱分反而制造断口。正确做法是就近打孔 + 布局分区</td></tr>
+    <tr><td>「四层板一定比两层好」</td><td class="yes">对</td><td>但前提是 L2 不被分割、不被挖断。一张碎掉的 L2 不如完整的两层板</td></tr>
+    <tr><td>「电源平面不能当参考平面」</td><td class="no">✗</td><td>只要充分去耦，交流上等价于地（0.016 Ω @ 1 MHz）</td></tr>
+    <tr><td>「跨平面加个 0 Ω 电阻就行」</td><td class="no">✗</td><td>0 Ω 只连直流，高频下它自身的电感照样让回流绕远。必须用电容</td></tr>
+    <tr><td>「过孔打得越多越好」</td><td class="no">✗</td><td>反焊盘会把平面挖成筛子。够用就好（GND 脚 1~2 孔）</td></tr>
+    <tr><td>「铺铜铺满了就行」</td><td class="no">✗</td><td>不缝合的孤岛是天线，比不铺更糟</td></tr>
+  </tbody>
+</table>
+
+<h2 id="c10"><span class="num">10</span>画板自检清单</h2>
+
+<p>画完板，开跑 DRC 之前，逐条过一遍。</p>
+
+<table>
+  <thead><tr><th style="width:7%">#</th><th style="width:38%">检查项</th><th>判据</th></tr></thead>
+  <tbody>
+    <tr><td class="num">1</td><td>L2 有没有断口？</td><td>SPI / I²S / USB 走线正下方必须连续，用平面层截图逐段目视</td></tr>
+    <tr><td class="num">2</td><td>顶层铺铜缝合了吗？</td><td>每块孤岛 4~8 个过孔连到 L2</td></tr>
+    <tr><td class="num">3</td><td>IC 的 GND 脚就近打孔？</td><td>从引脚出来 2 mm 内必须有孔，不许先拉线</td></tr>
+    <tr><td class="num">4</td><td>有信号跨平面吗？</td><td>每条高速线全程只认一个平面；非跨不可就在跨点旁加 100 nF</td></tr>
+    <tr><td class="num">5</td><td>大电流过孔并了吗？</td><td><code>5V_SYS</code> 2~3 孔，<code>3V3</code> 主干 2 孔</td></tr>
+    <tr><td class="num">6</td><td>密脚 IC 下方过孔过密？</td><td><code>U14</code>/<code>U15</code> 下方别把 L2 挖成筛子</td></tr>
+    <tr><td class="num">7</td><td>GND 焊盘要不要热焊盘？</td><td>低频 / 电源脚要（否则难焊）；<b>SPI / I²S 的地不要</b>（细颈是电感）</td></tr>
+    <tr><td class="num">8</td><td>L4 有没有误放高速线？</td><td>不许。L4 只放低速，否则 L3 的分割问题会被触发</td></tr>
+  </tbody>
+</table>
+
+<h2 id="c11"><span class="num">11</span>如果只记五句话</h2>
+
+<div class="takeaway">
+  <ol>
+    <li><b>电流必须走闭合回路</b>，你画的线只是去路。问题都在回路上。</li>
+    <li><b>高频回流贴着走线正下方走</b>，不贴你画的地线。所以「地画在哪」不重要，「走线正下方有没有铜」才重要。</li>
+    <li><b>参考平面 = 回流的最低阻抗路径</b>，可以是 GND，也可以是充分去耦的电源平面。</li>
+    <li><b>一个信号全程只认一个平面</b>，跨了就必须在跨点旁加缝合电容。</li>
+    <li><b>四层板的价值 = 把 h 从 1.6 mm 压到 0.2 mm</b>，代价是 L2 必须保持完整。</li>
+  </ol>
+</div>
+
+<div class="sep"></div>
+
+<footer>
+  <b>配套文档：</b><code>docs/PCB_GND_REFLOW_GUIDE.md</code>（施工检查表，本讲义的执行版）<br>
+  <b>术语约定：</b>h = 信号走线到参考平面的垂直距离；回流 = return current，与信号电流等量反向的那一半。<br>
+  <b>数据来源等级：</b>回流「3h 扩散」与「1 MHz 分界」为工程设计经验规则（量级正确，非精确边界）；2 nH / 10 nH、1.8~2.3 A、0.016 Ω 等数值为按标准公式对本板参数的计算值；层叠与电源分配为本板 2026-10 定案。
+</footer>
+
+</article>
+</body>
+</html>
