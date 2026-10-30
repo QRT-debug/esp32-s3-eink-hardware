@@ -237,7 +237,7 @@ Basic Part（基础库）   15 颗 / 3 种：100kΩ(C149504) · 1kΩ(C17513) · 
 
 ---
 
-## 四、C 类：新增的 PCB / 固件约束（13 条）
+## 四、C 类：新增的 PCB / 固件约束（14 条）
 
 ### C-1 ★★ USBLC6 的走线长度直接决定钳位电压（手册 §2.2 定量）
 
@@ -408,6 +408,31 @@ IN = 低  ⇒  COM 接 NC   （本板 = PCM 路）
 | **天线** | **蛇形 PCB 印刷天线，位于 19.0 mm 边的顶端**（离引脚排最远的那一端）|
 
 **PCB 布局约束**：模组**天线端要朝向板边并留净空**（各层去铜），且不能被金属、电池或喇叭磁体遮挡。本板 `U4`（蓝牙）与 `U1`（ESP32）两个天线**要分开布置**，避免互相遮挡。
+
+---
+
+### C-14 ★ `MCP6002` 的供电去耦与 RISO 有明确的定量依据（手册 §4.3 / §4.4）
+
+**① 供电去耦有距离要求**（§4.4 原文）：
+
+> *"the power supply pin (VDD for single supply) should have a **local bypass capacitor (i.e., 0.01 µF to 0.1 µF) within 2 mm** for good high-frequency performance. It also needs a **bulk capacitor (i.e., 1 µF or larger) within 100 mm** to provide large, slow currents. This bulk capacitor can be shared with nearby analog parts."*
+
+| 本板 | 值 | 要求 |
+|---|---|---|
+| `C66` | 100 nF（0.1 µF）| **必须在 `U17.8` 的 2 mm 内** ← PCB 硬指标 |
+| `C65` | 10 µF（≥1 µF）| 100 mm 内即可，可与邻近模拟件共用 |
+
+**② `R33` 100 Ω 不是拍脑袋，来自 Figure 4-3 / 4-4**
+
+- **Figure 4-3**：`RISO` 串在运放输出与负载电容 `CL` 之间（本板 = `R33` + `C62`）
+- **Figure 4-4**：横轴 `CL/GN`（**10 pF ~ 10 nF**），纵轴推荐 `RISO`（**10 ~ 1000 Ω**），三条曲线 `GN=1 / GN=2 / RL=100k`
+- 趋势：**`CL` 越大，推荐 `RISO` 越小**（10 nF 处约 20~30 Ω）
+
+**诚实说明**：本板 `C62 = 100 µF`，是图上横轴上限（10 nF）的 **10⁴ 倍 ⇒ 属于曲线外推**。选 100 Ω 的依据是「`RISO` 越大相位裕度越好」这一单调趋势 + 对 10 kΩ 负载只衰减 0.99%，**最终要靠首板看方阶跃响应（有无过冲/振铃）确认**。
+
+**③ 未使用的运放要接成跟随器**（§4.5 Figure 4-5 Circuit A：输入接分压参考、输出接 IN−，噪声增益最小）。本板 A/B 两半都用上了；**若将来砍掉 line-out，A 半必须按 Circuit A 接**，不能悬空。
+
+**④ 输入保护**（§4.1.2 Figure 4-2）：ESD 二极管 + 串限流电阻。本板输入端已有 47 kΩ 求和电阻，天然满足限流要求。
 
 ---
 
