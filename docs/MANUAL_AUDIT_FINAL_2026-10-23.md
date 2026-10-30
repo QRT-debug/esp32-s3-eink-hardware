@@ -171,11 +171,16 @@ V_$1N649 = (V1/100k + V2/100k + 0 + 0) × 25k = (V1+V2)/4
 
 - 电路设计：**0 处必须修改**
 - PCB 约束：**13 条**（前轮 10 条 + 本轮 3 条）
-- 固件待办：**4 条**（`GPIO41` 上电时序 · 数字音量默认 ≤−10 dB · SPI 降频后路 · **SD 独立分频**）
+- 固件待办：**5 条**（`GPIO41` 上电时序 · 数字音量默认 ≤−10 dB · SPI 降频后路 · SD 独立分频 · **麦克风 I²S 格式**）
   - ★ **第 4 条（2026-10-27 新增）**：SD 卡与屏共享 `SCK`/`MOSI`/`MISO`（`GPIO11/12/13`），但 **SD 的 SPI 模式规范上限 25 MHz**，屏却要跑 40 MHz ⇒ **必须给 SD 单独调 `spi_bus_add_device()` 配 `clock_speed_hz ≤ 25 MHz`**。
     - **不是「降屏」**：每个 `spi_device` 有独立频率，传输时自动切换 ⇒ 屏照旧 40 MHz，不受影响。
     - **另需音频缓冲 ≥ 16 KB**：盖住刷屏一帧占用的 ~30 ms（176 KB/s × 30 ms ≈ 5.3 KB 缺口）。
     - **硬件配套**：`R52`/`R53`（33 Ω）**只串在屏这一支**（`SPI_MOSI`/`SPI_SCK` = 电阻 + 屏），**SD 直连**（`GPIO11`/`GPIO12` = ESP32 引脚 + 电阻源端 + SD）—— 这个取舍的前提就是「SD 只跑 ≤25 MHz」；若 SD 也跑 40 MHz，它比屏更需要串阻。
+  - ★★ **第 5 条（2026-10-30 新增，来自 `GSA3526` 手册看图核查）**：**麦克风必须配「标准 I²S」，不是左对齐。**
+    - 手册原文：*"The mode must be **I2S with MSB delayed 1 BCLK cycle after WS changes**"*，另有 *"WS must be **BCLK/64**"*、*"WS must be synchronized on the **falling edge** of BCLK"*。
+    - ⇒ `communication_format = I2S_COMM_FORMAT_STAND_I2S`，**禁用 `LEFT_ALIGN`**；`slot_bit_width = 32`（× 2 = 64 BCLK/帧）；`bits_per_sample = 24`。
+    - **配错的后果**：采样值整体错位 1 bit ⇒ **音量减半 + 失真**，而示波器看时钟/波形全正常 —— 属「引脚全对、功能全废」类故障。
+    - **另注**：手册要求 `WS`/`BCLK`/`DATA` 各串 27~51 Ω 是**可选**改善（判据：走线(inch) > 2×tr(ns) 才算电长线）；本板走线 ≤100 mm、tr≈2~3 ns ⇒ 临界偏「非电长线」，**不必加串阻，但布局必须保证 `C80` 到 `MK1.VDD` 短而宽、`C80` 地焊盘直接打孔到 L2**。
 
 
 ## 五、收尾补核（USB 链路 + 文档更正）

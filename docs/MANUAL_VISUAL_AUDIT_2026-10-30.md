@@ -237,7 +237,7 @@ Basic Part（基础库）   15 颗 / 3 种：100kΩ(C149504) · 1kΩ(C17513) · 
 
 ---
 
-## 四、C 类：新增的 PCB / 固件约束（10 条）
+## 四、C 类：新增的 PCB / 固件约束（13 条）
 
 ### C-1 ★★ USBLC6 的走线长度直接决定钳位电压（手册 §2.2 定量）
 
@@ -351,6 +351,66 @@ IN = 低  ⇒  COM 接 NC   （本板 = PCM 路）
 
 ---
 
+### C-11 ★★ 麦克风 I²S 格式：标准 I²S（MSB 延迟 1 BCLK），**不是左对齐**
+
+`GSA3526` 手册 §"I2S Timing and Port Configuration Guidelines" 给出 5 条硬约束：
+
+> - *BCLK period must be in the range shown in Figure 2*
+> - ***WS must be synchronized (changing) on the falling edge of BCLK***
+> - ***WS must be BCLK/64***
+> - *The Hold Time must be greater than the Hold Time of the Receiver*
+> - ***The mode must be I2S with MSB delayed 1 BCLK cycle after WS changes***
+
+**对本板的落地要求**：
+
+| 要求 | ESP-IDF 配置 |
+|---|---|
+| **标准 I²S（MSB 延迟 1 BCLK）** | `communication_format = I2S_COMM_FORMAT_STAND_I2S` —— **不能用 `LEFT_ALIGN`** |
+| **WS = BCLK/64** | `slot_bit_width = I2S_SLOT_BIT_WIDTH_32`（32 × 2 声道 = 64 BCLK/帧）|
+| WS 在 **BCLK 下降沿**跳变 | ESP32-S3 I²S 主机默认即在下降沿更新 WS ✅ |
+| 数据 **24 bit、MSB first** | `bits_per_sample = 24`，按 32-bit 容器解析 |
+
+**这是「引脚全对、功能全废」的典型故障**：格式配错（用左对齐）会让采样值整体错位 1 bit —— 表现为**音量减半 + 失真**，而示波器看时钟、波形全都正常。
+
+### C-12 ★ 麦克风走线：什么情况才需要串阻（量化判据）
+
+`GSA3526` 手册 §"System Connections" 原文：
+
+> *"Traces are considered **electrically long when the length of the trace (in inches) is greater than 2 times the rise/fall time (in nS)**."*
+> *"Even if the traces are not electrically long, **R41-R44 can be used as dampening resistors (27-51 Ohms)** to improve signal integrity…"*
+> *"In either case, **R41-R44 are to be placed as close as possible to the device that drives the trace (signal source)**."*
+> *"The decoupling capacitors … most effective if the trace inductance between the capacitor and microphone is minimized … **using short, wide traces**. If a ground plane is used under the microphone, then **connect the capacitor ground pads directly to the plane with vias without any trace used**."*
+
+**判据**：电长线 ⟺ `走线长度(inch) > 2 × tr(ns)`
+
+| 项 | 本板数值 |
+|---|---|
+| `MK1` → `U1` 走线 | ≤ 100 mm ≈ **3.9 inch** |
+| ESP32 GPIO 上升时间（40 mA 驱动）| ≈ 2~3 ns ⇒ 阈值 **4~6 inch = 100~150 mm** |
+| **判定** | 临界偏「非电长线」⇒ **不需要受控阻抗** |
+
+**三个实际结论**：
+
+1. **不需要 50~120 Ω 受控阻抗**（那是「电长线」才要求的）
+2. **27~51 Ω 串阻是可选改善，不是强制**。若加，**位置必须在驱动端** —— 而 `WS`/`BCLK` 的源是 ESP32、**`DATA` 的源是麦克风**，所以 DATA 的串阻要靠麦克风侧。这一点极易搞反
+3. **去耦布局比串阻更重要**：`C80` 到 `MK1.VDD` 要**短而宽**；麦克风下方有 L2 地平面时，**`C80` 的地焊盘直接打孔到 L2，不要走线**
+
+**200 pF**：手册参考设计画的是 `0.1 µF ∥ 200 pF`，本板只有 `C80` 100 nF。200 pF 用于更高频段旁路，属可选加强，非必需。
+
+### C-13 ★ `EWM104` 的封装与天线位置
+
+手册封装图（同时给了 **24P 与 16P 两版**，本板用 **24P** 即 `BT60SP3` 版）：
+
+| 项 | 值 |
+|---|---|
+| 外形 | **13.0 × 19.0 × 2.80 mm** |
+| 引脚 | 24P 双排，间距 1.27 mm，焊盘 0.50 mm（顶）/ 0.90 mm（底）|
+| **天线** | **蛇形 PCB 印刷天线，位于 19.0 mm 边的顶端**（离引脚排最远的那一端）|
+
+**PCB 布局约束**：模组**天线端要朝向板边并留净空**（各层去铜），且不能被金属、电池或喇叭磁体遮挡。本板 `U4`（蓝牙）与 `U1`（ESP32）两个天线**要分开布置**，避免互相遮挡。
+
+---
+
 ## 五、确认无误（逐脚全对）
 
 | 器件 | 逐脚结果 | 关键依据 |
@@ -388,7 +448,7 @@ NC2 = C44(1 µF 到 GND)   → INN                ← PCM 单端输入，人造�
 
 | 缺口 | 原因 | 影响 |
 |---|---|---|
-| **`GSA3526` 与 `EWM104` 的整页渲染失败** | 两本 PDF 的整页渲染器均只出 0~1 页（其余 13 本正常）；`--image-dir` 也报 "picture(s) could not be written" | 引脚表/电气参数已从文字层取得；**封装图、典型应用图没看到** |
+| ~~`GSA3526` / `EWM104` 整页渲染失败~~ → **已补救（10-30 晚）** | 两本 PDF 的整页渲染器均只出 0~1 页（其余 13 本正常），`--image-dir` 也报错 | ✅ **改用「直接提取 PDF 内嵌 JPEG（`DCTDecode`）」补上了**：`GSA3526` 提取 45 张（看到**封装焊盘图、典型应用电路、I²S 时序图**）、`EWM104` 提取 8 张（看到 **24P/16P 封装图、天线位置、回流焊曲线**）。图像层已补，文字仍从 md/txt 取 |
 | **`ESP32-S3 硬件设计指南` 本机没有** | 规格书 §11.2 指向另一份文档 | 天线净空的细则（各层去铜、外壳距离）**只能按通用规则推断** |
 | **`ILI9341` 249 页只看了 6 页** | 精确看的是 §12 上电时序、§18.3.3/18.3.4 SPI 时序、目录、特性表 | 命令表、伽马、RGB 接口时序**未看**（本板不用 RGB 接口）|
 | **`PJ-342E` 封装焊盘编号未交叉验证** | 手册 PCB LAYOUT 图 400 dpi 仍偏小 | 符号编号已由 SCHEMATIC 图确认；**封装焊盘与符号编号的对应靠立创库保证**（建议首板实物核对一次）|
@@ -398,6 +458,7 @@ NC2 = C44(1 µF 到 GND)   → INN                ← PCM 单端输入，人造�
 ## 七、一句话总结
 
 > **15 个器件、约 600 页，逐本翻图核对完毕：所有器件的「引脚—网络」连接 0 处错误，与 10-23 文字核查的结论一致。**
+> **其中 `GSA3526` / `EWM104` 两本整页渲染失败（13/15 成功），已改用「提取内嵌 JPEG」补看图像层** —— 补出三条硬约束：麦克风要求**标准 I²S（MSB 延迟 1 BCLK）**且 **WS=BCLK/64 在下降沿跳变**、麦克风串阻判据是「走线(inch) > 2×tr(ns)」才需受控阻抗（本板不需要）、蓝牙模组**天线在 19 mm 边顶端**要留净空。
 > **但看图翻出三件文字核查看不到的事**：① 屏背光 `3.3 Ω` 给出约 **80 mA / 280 cd/m²**（标称的 80%，比屏厂自己的 4.33 Ω 方案还亮），属**保守而非错误**，改成 2.7 Ω 可提到 98 mA；② `USBLC6` 的钳位电压对走线长度极度敏感（10 mm 就从 31 V 变 319 V）；③ `ILI9341` 的 40 MHz 是**成体系的超规格**，`tds=30 ns` 比整个 25 ns 周期还长。
 > **另有 5 处旧结论需要更正**：TS5A 的 Ron 是 10 Ω 不是 0.9 Ω、NS4150C 是 400 kHz/2.0 W@THD1%、MCP6002 压摆率其实够用、屏背光电流不是 63.5 mA。
 > **修正后，原理图仍然没有「必须改」的错误**；风险重心全部落在 **PCB 的 13+10 条约束** 和 **首板实测**上。
